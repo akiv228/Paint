@@ -1,0 +1,50 @@
+# Qt build artifacts
+Makefile
+*.o
+*.so
+*.a
+moc_*
+ui_*.h
+*.moc
+*.pro.user
+*.pro.user.*
+.qmake.stash
+.qmake.cache
+build/
+debug/
+release/
+
+# Qt Creator
+.qtcreator/
+.qtc_clangd/
+.qtc_clazy/
+*.creator
+*.creator.user*
+*.files
+*.includes
+*.config
+
+# Compiled files
+*.exe
+*.dll
+*.dylib
+Paint  # ваша скомпилированная программа
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
