@@ -50,6 +50,7 @@ public:
     void setCurrentLayer(int index);
     void moveFigureToLayer(Figure *figure, int layerIndex);
 
+
 signals:
     void figureTypeChanged();
     void layersChanged();

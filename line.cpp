@@ -1,6 +1,7 @@
 // line.cpp
 #include "line.h"
 #include <cmath>
+#include <QPainterPathStroker>
 
 Line::Line(QPointF point, QObject *parent)
     : Figure{point, parent}
@@ -17,7 +18,17 @@ QPainterPath Line::shape() const
     QPainterPath path;
     path.moveTo(getStartPoint());
     path.lineTo(getEndPoint());
-    return path;
+
+    QPainterPathStroker stroker;
+    stroker.setWidth(getPenWidth() + 5); // запас 5 пикселей для удобства
+    return stroker.createStroke(path);
+}
+
+QRectF Line::boundingRect() const
+{
+    QRectF rect(getStartPoint(), getEndPoint());
+    qreal extra = (getPenWidth() + 5) / 2.0;
+    return rect.normalized().adjusted(-extra, -extra, extra, extra);
 }
 
 qreal Line::getPerimeter()

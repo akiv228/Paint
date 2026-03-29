@@ -81,16 +81,33 @@ void Scene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
         this->update();
         return;
     }
-    Figure *temp_figure = figureAt(event->scenePos());
-    clearSelection();
+
+    // Ищем фигуру только на текущем слое
+    Figure *temp_figure = nullptr;
+    QList<QGraphicsItem*> itemsAtPos = items(event->scenePos());
+    for (QGraphicsItem *item : itemsAtPos) {
+        Figure *fig = dynamic_cast<Figure*>(item);
+        if (fig && fig->layer() == currentLayer()) {
+            temp_figure = fig;
+            break;
+        }
+    }
+
     if (temp_figure != nullptr) {
+        clearSelection();
         addToSelection(temp_figure);
         pressPos_ = event->scenePos();
         selectedStartPoint_ = temp_figure->getStartPoint();
         selectedEndPoint_ = temp_figure->getEndPoint();
     }
+    else
+    {
+        // Двойной клик вне фигуры – снимаем выделение
+        clearSelection();
+    }
     this->update(QRectF(0, 0, this->width(), this->height()));
 }
+
 void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if (isBuildingPolyline_)
@@ -107,6 +124,27 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         return;
     }
 
+    if (event->button() == Qt::RightButton)
+    {
+        Figure *clicked = nullptr;
+        QList<QGraphicsItem*> itemsAtPos = items(event->scenePos());
+        for (QGraphicsItem *item : itemsAtPos) {
+            Figure *fig = dynamic_cast<Figure*>(item);
+            if (fig && fig->layer() == currentLayer()) {
+                clicked = fig;
+                break;
+            }
+        }
+        if (clicked) {
+            if (isSelected(clicked))
+                removeFromSelection(clicked);
+        } else {
+            clearSelection();
+        }
+        return;
+    }
+
+    // Левая кнопка
     QList<QGraphicsItem*> itemsAtPos = items(event->scenePos());
     Figure *clicked = nullptr;
     for (QGraphicsItem *item : itemsAtPos) {
@@ -117,35 +155,31 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         }
     }
 
-    bool shiftPressed = (event->modifiers() & Qt::ShiftModifier);
-
-    if (!shiftPressed) {
-        clearSelection();
-    }
     if (clicked != nullptr) {
+        bool shiftPressed = (event->modifiers() & Qt::ShiftModifier);
+        bool ctrlPressed = (event->modifiers() & Qt::ControlModifier);
+        
+        if (!shiftPressed && !ctrlPressed) {
+            // Если фигура уже выделена, не очищаем выделение, иначе очищаем
+            if (!isSelected(clicked)) {
+                clearSelection();
+            }
+        }
+        
         if (shiftPressed) {
             if (isSelected(clicked))
                 removeFromSelection(clicked);
             else
                 addToSelection(clicked);
-        } else {
-            addToSelection(clicked);
-        }
-    }
-
-    if (!selectedFigures_.isEmpty() && clicked != nullptr && isSelected(clicked)) {
-        Figure *selected = clicked;
-        QPointF local_pos = selected->mapFromScene(event->scenePos());
-        if (onRectBoard(selected->boundingRect(), local_pos, currentSide_)) {
-            mode_ = kChanging;
-            selectedStartPoint_ = selected->getStartPoint();
-            selectedEndPoint_ = selected->getEndPoint();
-        } else if (selected->shape().contains(local_pos)) {
-            mode_ = kMoving;
-            pressPos_ = event->scenePos();
-        } else {
+        } else if (ctrlPressed) {
+            // Режим вращения по Ctrl + клик внутри фигуры
+            if (!isSelected(clicked)) {
+                clearSelection();
+                addToSelection(clicked);
+            }
+            // Устанавливаем режим вращения
             if (selectedFigures_.size() == 1) {
-                rotationCenter_ = selected->mapToScene(selected->boundingRect().center());
+                rotationCenter_ = clicked->mapToScene(clicked->boundingRect().center());
             } else {
                 QRectF totalRect;
                 for (Figure *fig : selectedFigures_) {
@@ -157,11 +191,40 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
             startAngle_ = std::atan2(start_vector.y(), start_vector.x()) * 180 / M_PI;
             pressPos_ = event->scenePos();
             mode_ = kRotating;
+            clicked->update();
+            return;
+        } else {
+            // Обычный клик без модификаторов
+            if (!isSelected(clicked)) {
+                addToSelection(clicked);
+            }
         }
-        selected->update();
+
+        if (!selectedFigures_.isEmpty() && isSelected(clicked) && mode_ != kRotating) {
+            Figure *selected = clicked;
+            QPointF local_pos = selected->mapFromScene(event->scenePos());
+            if (onRectBoard(selected->boundingRect(), local_pos, currentSide_)) {
+                mode_ = kChanging;
+                selectedStartPoint_ = selected->getStartPoint();
+                selectedEndPoint_ = selected->getEndPoint();
+            } else if (selected->shape().contains(local_pos)) {
+                mode_ = kMoving;
+                pressPos_ = event->scenePos();
+            }
+            selected->update();
+        }
         return;
     }
 
+    // Клик по пустому месту левой кнопкой
+    bool shiftPressed = (event->modifiers() & Qt::ShiftModifier);
+    if (shiftPressed) {
+        // Если shift нажат, не создаём новую фигуру
+        return;
+    }
+    // Выделение НЕ снимается при одинарном клике вне фигуры
+
+    // Создание новой фигуры
     switch (figureType_)
     {
     case kTriangle:
@@ -205,7 +268,7 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
             polyline->setBrushColor(currentBrushColor_);
             polyline->setPenWidth(currentPenWidth_);
             this->addItem(currentFigure_);
-            currentFigure_->updateTransformOriginPoint(); 
+            currentFigure_->updateTransformOriginPoint();
             if (currentLayer())
                 currentLayer()->addFigure(currentFigure_);
             currentAdded_ = true;
@@ -258,25 +321,10 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
             if (angle_delta != 0)
             {
-                qreal rad = angle_delta * M_PI / 180.0;
-                qreal cosA = cos(rad);
-                qreal sinA = sin(rad);
-
-                if (selectedFigures_.size() == 1) {
-                    // Для одной фигуры – только поворот вокруг её центра
-                    Figure *fig = selectedFigures_.first();
+                // Для каждой фигуры – вращение вокруг её собственного центра
+                for (Figure *fig : selectedFigures_) {
+                    fig->setTransformOriginPoint(fig->boundingRect().center());
                     fig->setRotation(fig->rotation() + angle_delta);
-                } else {
-                    // Для группы – поворачиваем каждую фигуру вокруг общего центра
-                    for (Figure *fig : selectedFigures_) {
-                        QPointF pos = fig->pos();
-                        QPointF vec = pos - rotationCenter_;
-                        QPointF newVec(vec.x() * cosA - vec.y() * sinA,
-                                    vec.x() * sinA + vec.y() * cosA);
-                        QPointF newPos = rotationCenter_ + newVec;
-                        fig->setPos(newPos);
-                        fig->setRotation(fig->rotation() + angle_delta);
-                    }
                 }
                 startAngle_ = current_angle;
                 this->update();
@@ -415,10 +463,6 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void Scene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (!selectedFigures_.isEmpty() && mode_ == kRotating && qAbs(pressPos_.x() - event->scenePos().x()) < 10 && qAbs(pressPos_.y() - event->scenePos().y()) < 10)
-    {
-        clearSelection();
-    }
     mode_ = kDrawing;
     selectedPointIndex_ = 0;
 
@@ -491,6 +535,9 @@ qreal Scene::getSelectedFigureSquare(bool &ok)
 
 void Scene::removeAllItems()
 {
+    // Снимаем выделение, чтобы selectedFigures_ опустела
+    clearSelection();
+
     pushUndoState();
 
     QList<QGraphicsItem*> allItems = items();
@@ -511,10 +558,10 @@ void Scene::removeAllItems()
 
     addLayer("Layer 1");
     setCurrentLayer(0);
-    clearSelection();
     update();
     emit layersChanged();
 }
+
 
 
 void Scene::un_select()
@@ -605,85 +652,146 @@ void Scene::scaleSelectedFigure(qreal factor)
     selected->update();
 }
 
+// void Scene::copySelectedFigure()
+// {
+//     if (selectedFigures_.isEmpty()) return;
+
+//     QList<Figure*> copies;
+
+//     for (Figure *original : selectedFigures_) {
+//         FigureType type = original->getFigureType();
+//         Figure *copy = nullptr;
+
+//         switch (type) {
+//         case kTriangle:
+//             copy = new Triangle(original->getStartPoint());
+//             break;
+//         case kCircle:
+//             copy = new Circle(original->getStartPoint());
+//             break;
+//         case kRhombus:
+//             copy = new Rhombus(original->getStartPoint());
+//             break;
+//         case kSquare:
+//             copy = new Square(original->getStartPoint());
+//             break;
+//         case kRectangle:
+//             copy = new Rectangle(original->getStartPoint());
+//             break;
+//         case kStar:
+//             copy = new Star(original->getStartPoint());
+//             break;
+//         case kPolygon:
+//             copy = new Polygon(original->getStartPoint());
+//             break;
+//         case kTrapezoid:
+//             copy = new Trapezoid(original->getStartPoint());
+//             break;
+//         case kLine:
+//             copy = new Line(original->getStartPoint());
+//             break;
+//         case kEllipse:
+//             copy = new Ellipse(original->getStartPoint());
+//             break;
+//         case kPolyline:
+//             {
+//                 Polyline *origPoly = dynamic_cast<Polyline*>(original);
+//                 if (origPoly) {
+//                     copy = new Polyline(original->getStartPoint());
+//                     Polyline *copyPoly = dynamic_cast<Polyline*>(copy);
+//                     if (copyPoly) {
+//                         copyPoly->setPoints(origPoly->points());
+//                     }
+//                 }
+//             }
+//             break;
+//         default:
+//             continue;
+//         }
+
+//         if (!copy) continue;
+
+//         // Копируем свойства фигуры
+//         copy->setPenColor(original->getPenColor());
+//         copy->setBrushColor(original->getBrushColor());
+//         copy->setPenWidth(original->getPenWidth());
+//         copy->setStartPoint(original->getStartPoint());
+//         copy->setEndPoint(original->getEndPoint());
+//         copy->setPos(original->pos() + QPointF(20, 20)); // смещаем
+//         copy->setRotation(original->rotation());
+//         copy->setTransformOriginPoint(original->transformOriginPoint());
+
+//         // Добавляем на сцену и слой
+//         addItem(copy);
+//         if (currentLayer())
+//             currentLayer()->addFigure(copy);
+
+//         copies.append(copy);
+//     }
+
+//     if (copies.isEmpty()) return;
+
+//     // Сохраняем состояние для undo
+//     pushUndoState();
+
+//     // Снимаем выделение с оригиналов
+//     for (Figure *original : selectedFigures_) {
+//         original->un_select();
+//         original->update();
+//     }
+//     clearSelection();
+
+//     // Выделяем новые копии
+//     for (Figure *copy : copies) {
+//         addToSelection(copy);
+//         copy->update();
+//     }
+
+//     update();
+// }
+
+
 void Scene::copySelectedFigure()
 {
     if (selectedFigures_.isEmpty()) return;
-    Figure *original = selectedFigures_.first();
-    Figure *copy = nullptr;
 
-    FigureType type = original->getFigureType();
+    QList<Figure*> copies;
 
-    switch (type) {
-    case kTriangle:
-        copy = new Triangle(original->getStartPoint());
-        break;
-    case kCircle:
-        copy = new Circle(original->getStartPoint());
-        break;
-    case kRhombus:
-        copy = new Rhombus(original->getStartPoint());
-        break;
-    case kSquare:
-        copy = new Square(original->getStartPoint());
-        break;
-    case kRectangle:
-        copy = new Rectangle(original->getStartPoint());
-        break;
-    case kStar:
-        copy = new Star(original->getStartPoint());
-        break;
-    case kPolygon:
-        copy = new Polygon(original->getStartPoint());
-        break;
-    case kTrapezoid:
-        copy = new Trapezoid(original->getStartPoint());
-        break;
-    case kLine:
-        copy = new Line(original->getStartPoint());
-        break;
-    case kPolyline:
-        {
-            Polyline *origPoly = dynamic_cast<Polyline*>(original);
-            if (origPoly) {
-                copy = new Polyline(original->getStartPoint());
-                Polyline *copyPoly = dynamic_cast<Polyline*>(copy);
-                if (copyPoly) {
-                    copyPoly->setPoints(origPoly->points());
-                }
-            }
-        }
-        break;
-    case kEllipse:
-        copy = new Ellipse(original->getStartPoint());
-        break;
-    default:
-        return;
+    for (Figure *original : selectedFigures_) {
+        Figure *copy = original->clone();
+        if (!copy) continue;
+
+        // Смещаем копию на 20 пикселей вправо и вниз
+        copy->setPos(original->pos() + QPointF(20, 20));
+
+        // Добавляем на сцену и на текущий слой
+        addItem(copy);
+        if (currentLayer())
+            currentLayer()->addFigure(copy);
+
+        copies.append(copy);
     }
 
-    if (copy == nullptr) return;
+    if (copies.isEmpty()) return;
 
-    copy->setPenColor(original->getPenColor());
-    copy->setBrushColor(original->getBrushColor());
-    copy->setPenWidth(original->getPenWidth());
-    copy->setStartPoint(original->getStartPoint());
-    copy->setEndPoint(original->getEndPoint());
-    copy->setPos(original->pos());
-    copy->setRotation(original->rotation());
-    copy->setTransformOriginPoint(original->transformOriginPoint());
-
-    copy->setPos(copy->pos() + QPointF(20, 20));
-
-    this->addItem(copy);
-    if (currentLayer())
-        currentLayer()->addFigure(copy);
     pushUndoState();
 
-    original->un_select();
-    original->update();
-
+    // Снимаем выделение с оригиналов
+    for (Figure *original : selectedFigures_) {
+        original->un_select();
+        original->update();
+    }
     clearSelection();
-    addToSelection(copy);
+
+    // Выделяем новые копии
+    for (Figure *copy : copies) {
+        addToSelection(copy);
+        copy->update();
+    }
+
+    update();
 }
+
 
 void Scene::pushUndoState()
 {
@@ -784,14 +892,47 @@ void Scene::addLayer(const QString &name)
 
 void Scene::removeLayer(int index) {
     if (index < 0 || index >= layers_.size()) return;
-    Layer *layer = layers_.takeAt(index);
+
+    Layer *layer = layers_[index];
+
+    // Удаляем все выделенные фигуры, принадлежащие этому слою, из selectedFigures_
+    for (Figure *fig : layer->figures()) {
+        if (selectedFigures_.contains(fig)) {
+            selectedFigures_.removeOne(fig);
+            fig->un_select();
+        }
+    }
+
+    // Удаляем слой из массива (без удаления объектов, только из списка)
+    layers_.removeAt(index);
+
+    // Удаляем все фигуры слоя из сцены и освобождаем память
     for (Figure *figure : layer->figures()) {
         if (figure->scene() == this) {
             removeItem(figure);
         }
         delete figure;
     }
+
+    // Очищаем список фигур в слое, чтобы деструктор не удалял их повторно
+    layer->clear();
+
+    // Удаляем сам объект слоя
     delete layer;
+
+    // Корректируем currentLayerIndex_
+    if (layers_.isEmpty()) {
+        addLayer("Layer 1");
+        currentLayerIndex_ = 0;
+    } else {
+        if (currentLayerIndex_ >= layers_.size()) {
+            currentLayerIndex_ = layers_.size() - 1;
+        } else if (index <= currentLayerIndex_) {
+            currentLayerIndex_ = currentLayerIndex_ - 1;
+            if (currentLayerIndex_ < 0) currentLayerIndex_ = 0;
+        }
+    }
+
     updateZOrder();
     emit layersChanged();
 }
@@ -851,8 +992,11 @@ void Scene::moveFigureToLayer(Figure *figure, int layerIndex)
 
 void Scene::updateZOrder()
 {
-    for (int i = 0; i < layers_.size(); ++i) {
-        layers_[i]->setZBase(i * 1000);
+    const int layerCount = layers_.size();
+    for (int i = 0; i < layerCount; ++i) {
+        // Самый верхний слой (i=0) получает максимальный Z-баз
+        int zBase = (layerCount - 1 - i) * 1000;
+        layers_[i]->setZBase(zBase);
     }
 }
 
@@ -861,31 +1005,11 @@ void Scene::rotateSelected(qreal deltaAngle)
 {
     if (selectedFigures_.isEmpty()) return;
 
-    if (selectedFigures_.size() == 1) {
-        // Для одной фигуры – поворачиваем вокруг её центра
-        Figure *fig = selectedFigures_.first();
+    // Для каждой фигуры – вращение вокруг её собственного центра
+    for (Figure *fig : selectedFigures_) {
+        fig->setTransformOriginPoint(fig->boundingRect().center());
         fig->setRotation(fig->rotation() + deltaAngle);
-    } else {
-        // Для группы – вычисляем общий центр и поворачиваем все фигуры вокруг него
-        QRectF totalRect;
-        for (Figure *fig : selectedFigures_) {
-            totalRect = totalRect.united(fig->mapToScene(fig->boundingRect()).boundingRect());
-        }
-        QPointF center = totalRect.center();
-
-        qreal rad = deltaAngle * M_PI / 180.0;
-        qreal cosA = std::cos(rad);
-        qreal sinA = std::sin(rad);
-
-        for (Figure *fig : selectedFigures_) {
-            QPointF pos = fig->pos();
-            QPointF vec = pos - center;
-            QPointF newVec(vec.x() * cosA - vec.y() * sinA,
-                           vec.x() * sinA + vec.y() * cosA);
-            QPointF newPos = center + newVec;
-            fig->setPos(newPos);
-            fig->setRotation(fig->rotation() + deltaAngle);
-        }
     }
     update();
 }
+

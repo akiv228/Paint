@@ -17,6 +17,7 @@ public:
     FigureType getFigureType();
     QPointF getCenterOfMass() const override;
     Figure* clone() const override;
+    QRectF boundingRect() const override;
 
 private:
     QPolygonF polygon_;

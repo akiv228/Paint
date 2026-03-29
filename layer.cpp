@@ -69,6 +69,7 @@ void Layer::clear()
     figures_.clear();
 }
 
+
 void Layer::setZBase(int zBase)
 {
     zBase_ = zBase;

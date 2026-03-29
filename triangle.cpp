@@ -84,3 +84,20 @@ Figure* Triangle::clone() const
     copy->setTransformOriginPoint(transformOriginPoint());
     return copy;
 }
+
+
+QRectF Triangle::boundingRect() const
+{
+    // Возвращаем прямоугольник, охватывающий вершины треугольника
+    if (polygon_.isEmpty()) {
+        // Если полигон ещё не построен, используем start/end points
+        QPointF start = getStartPoint();
+        QPointF end = getEndPoint();
+        qreal x1 = qMin(start.x(), end.x());
+        qreal y1 = qMin(start.y(), end.y());
+        qreal x2 = qMax(start.x(), end.x());
+        qreal y2 = qMax(start.y(), end.y());
+        return QRectF(x1, y1, x2 - x1, y2 - y1);
+    }
+    return polygon_.boundingRect();
+}

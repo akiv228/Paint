@@ -14,6 +14,8 @@ public:
     FigureType getFigureType() override;
     QPainterPath shape() const override;
     Figure* clone() const override;
+    QRectF boundingRect() const override;
+
 
 private:
     QLineF line_;
