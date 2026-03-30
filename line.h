@@ -1,4 +1,4 @@
-// line.h
+
 #ifndef LINE_H
 #define LINE_H
 
@@ -23,4 +23,4 @@ private:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 };
 
-#endif // LINE_H
+#endif 

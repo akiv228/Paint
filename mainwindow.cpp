@@ -97,11 +97,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::wheelEvent(QWheelEvent *event)
 {
-    if (scene_->getSelectedFigure() != nullptr && scene_->getSelectedFigure()->is_selected())
+    if (!scene_->selectedFigures().isEmpty())
     {
         qreal factor = 1.0 + event->angleDelta().y() / 1200.0;
-        if (factor > 0.1 && factor < 10.0)
-            scene_->scaleSelectedFigure(factor);
+        if (factor > 0.1 && factor < 10.0) {
+            scene_->scaleSelectedFigures(factor);
+        }
     }
     event->accept();
 }
@@ -255,7 +256,8 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
         scene_->removeAllItems();
     }
 
-    if (scene_->getSelectedFigure() != nullptr && scene_->getSelectedFigure()->is_selected()) {
+    
+    if (!scene_->selectedFigures().isEmpty()) {
         QPointF delta(0, 0);
         if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {
             delta = QPointF(-1, 0);
@@ -267,7 +269,7 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
             delta = QPointF(0, 1);
         }
         if (event->key() == Qt::Key_Q) {
-            scene_->rotateSelected(-5.0);   // угол поворота (градусы)
+            scene_->rotateSelected(-5.0);
             event->accept();
             return;
         } else if (event->key() == Qt::Key_E) {
@@ -276,9 +278,14 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
             return;
         }
         if (!delta.isNull()) {
-            scene_->getSelectedFigure()->setPos(scene_->getSelectedFigure()->pos() + delta);
-            scene_->getSelectedFigure()->update();
+            
+            for (Figure *fig : scene_->selectedFigures()) {
+                fig->setPos(fig->pos() + delta);
+                fig->update();
+            }
             scene_->update();
+            event->accept();
+            return;
         }
     }
 
@@ -386,9 +393,6 @@ void MainWindow::setCurrentLayer(int index)
 void MainWindow::moveSelectedToLayer(int index)
 {
     if (index < 0) return;
-    Figure *selected = scene_->getSelectedFigure();
-    if (selected) {
-        scene_->moveFigureToLayer(selected, index);
-        scene_->update();
-    }
+    scene_->moveSelectedFiguresToLayer(index);
+    scene_->update();
 }

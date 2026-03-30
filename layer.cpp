@@ -43,16 +43,24 @@ QList<Figure*> Layer::figures() const
 
 void Layer::addFigure(Figure *figure)
 {
+    qDebug() << "Layer::addFigure: this =" << (void*)this << "figure =" << (void*)figure;
     if (!figures_.contains(figure)) {
         figures_.append(figure);
         figure->setLayer(this);
+        qDebug() << "  setLayer called, figure->layer() now =" << (void*)(figure->layer());
+        if (figure->layer() != this) {
+            qWarning() << "  ERROR: figure layer is not this layer!";
+        }
         figure->setVisible(visible_);
         figure->setZValue(zBase_ + figures_.size() - 1);
+    } else {
+        qDebug() << "  figure already in layer list!";
     }
 }
 
 void Layer::removeFigure(Figure *figure)
 {
+    qDebug() << "Layer::removeFigure: removing figure" << (void*)figure;
     if (figures_.removeOne(figure)) {
         figure->setLayer(nullptr);
         for (int i = 0; i < figures_.size(); ++i) {
@@ -63,9 +71,6 @@ void Layer::removeFigure(Figure *figure)
 
 void Layer::clear()
 {
-    // foreach (Figure *fig, figures_) {
-    //     delete fig;
-    // }
     figures_.clear();
 }
 

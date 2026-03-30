@@ -18,7 +18,9 @@ class Figure : public QObject, public QGraphicsItem
 
 public:
     explicit Figure(QPointF point, QObject *parent = nullptr);
-
+    void prepareGeometryChangePublic() {
+        prepareGeometryChange();
+    }
     QPointF getStartPoint() const;
     QPointF getEndPoint() const;
     void setStartPoint(const QPointF point);
@@ -42,6 +44,7 @@ public:
 
     void setLayer(Layer *layer);
     Layer* layer() const;
+    virtual ~Figure() = default;
 
 public slots:
     void updateRect();
@@ -63,4 +66,4 @@ signals:
     void pointChanged();
 };
 
-#endif // FIGURE_H
+#endif 

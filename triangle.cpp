@@ -1,57 +1,92 @@
 #include "triangle.h"
-
+#include <QLineF>
 #include <cmath>
 
 Triangle::Triangle(QPointF point, QObject *parent)
     : Figure{point, parent}
 {}
 
+QPolygonF Triangle::getPolygon() const
+{
+    QPolygonF poly;
+    QPointF start = getStartPoint();
+    QPointF end = getEndPoint();
+
+    
+    qreal left   = qMin(start.x(), end.x());
+    qreal right  = qMax(start.x(), end.x());
+    qreal top    = qMin(start.y(), end.y());
+    qreal bottom = qMax(start.y(), end.y());
+
+    
+    if (qFuzzyCompare(top, bottom)) {
+        bottom = top + 1.0;
+    }
+    if (qFuzzyCompare(left, right)) {
+        right = left + 1.0;
+    }
+
+    
+    poly << QPointF((left + right) / 2.0, top)   
+         << QPointF(right, bottom)                
+         << QPointF(left, bottom);                
+
+    return poly;
+}
+
 void Triangle::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+    
     painterInit(painter);
-    polygon_.clear();
-    polygon_ << QPointF(getStartPoint().x() + (getEndPoint().x() > getStartPoint().x() ? 1 : -1) * qAbs(getEndPoint().x() - getStartPoint().x()) / 2, getStartPoint().y())
-            << QPointF(getEndPoint().x() > getStartPoint().x() ? getEndPoint().x() : getStartPoint().x(), getEndPoint().y())
-            << QPointF(getEndPoint().x() > getStartPoint().x() ? getStartPoint().x() : getEndPoint().x(), getEndPoint().y());
+    polygon_ = getPolygon();
     painter->drawPolygon(polygon_);
 }
 
 QPainterPath Triangle::shape() const
 {
-    QPainterPath painter;
-    painter.addPolygon(polygon_);
-    return painter;
+    QPainterPath path;
+    path.addPolygon(getPolygon());
+    
+    
+    QPainterPathStroker stroker;
+    stroker.setWidth(2.0);
+    QPainterPath strokedPath = stroker.createStroke(path);
+    return strokedPath.united(path);
 }
 
 qreal Triangle::getPerimeter()
 {
     qreal perimeter = 0;
-    for (int i = 0; i < polygon_.size() - 1; i++) {
-        perimeter += std::sqrt(std::pow(polygon_.at(i + 1).x() - polygon_.at(i).x(), 2)
-                               + std::pow(polygon_.at(i + 1).y() - polygon_.at(i).y(), 2));
+    polygon_ = getPolygon();
+    int n = polygon_.size();
+    
+    if (n > 1) {
+        for (int i = 0; i < n - 1; i++) {
+            perimeter += QLineF(polygon_.at(i), polygon_.at(i + 1)).length();
+        }
+        perimeter += QLineF(polygon_.at(n - 1), polygon_.at(0)).length();
     }
-    if (polygon_.size() > 1) {
-        perimeter += std::sqrt(
-            std::pow(polygon_.at(polygon_.size() - 1).x() - polygon_.at(0).x(), 2)
-            + std::pow(polygon_.at(polygon_.size() - 1).y() - polygon_.at(0).y(), 2));
-    }
+    
     return perimeter;
 }
 
 qreal Triangle::getSquare()
 {
+    polygon_ = getPolygon();
     qreal sum = 0;
     int n = polygon_.size();
-    if (n > 1)
-    {
-        for (int i = 0; i < n - 1; i++)
-        {
+    
+    if (n > 1) {
+        for (int i = 0; i < n - 1; i++) {
             sum += polygon_.at(i).x() * polygon_.at(i + 1).y();
             sum -= polygon_.at(i + 1).x() * polygon_.at(i).y();
         }
         sum += polygon_.at(n - 1).x() * polygon_.at(0).y();
         sum -= polygon_.at(0).x() * polygon_.at(n - 1).y();
     }
+    
     return 0.5 * qAbs(sum);
 }
 
@@ -60,17 +95,17 @@ FigureType Triangle::getFigureType()
     return kTriangle;
 }
 
-//среднее арифметическое из координат его вершин: xc =1/3(x1+x2+x3) ; yc =1/3(y1+y2+y3).
 QPointF Triangle::getCenterOfMass() const
 {
-    if (polygon_.size() == 3) {
-        qreal x = (polygon_[0].x() + polygon_[1].x() + polygon_[2].x()) / 3.0;
-        qreal y = (polygon_[0].y() + polygon_[1].y() + polygon_[2].y()) / 3.0;
-        return QPointF(x, y); //в локальных координатах
+    QPolygonF poly = getPolygon();
+    if (poly.size() == 3) {
+        
+        qreal x = (poly[0].x() + poly[1].x() + poly[2].x()) / 3.0;
+        qreal y = (poly[0].y() + poly[1].y() + poly[2].y()) / 3.0;
+        return QPointF(x, y);
     }
     return boundingRect().center();
 }
-
 
 Figure* Triangle::clone() const
 {
@@ -85,19 +120,7 @@ Figure* Triangle::clone() const
     return copy;
 }
 
-
 QRectF Triangle::boundingRect() const
 {
-    // Возвращаем прямоугольник, охватывающий вершины треугольника
-    if (polygon_.isEmpty()) {
-        // Если полигон ещё не построен, используем start/end points
-        QPointF start = getStartPoint();
-        QPointF end = getEndPoint();
-        qreal x1 = qMin(start.x(), end.x());
-        qreal y1 = qMin(start.y(), end.y());
-        qreal x2 = qMax(start.x(), end.x());
-        qreal y2 = qMax(start.y(), end.y());
-        return QRectF(x1, y1, x2 - x1, y2 - y1);
-    }
-    return polygon_.boundingRect();
+    return getPolygon().boundingRect();
 }

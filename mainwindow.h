@@ -65,4 +65,4 @@ private slots:
     void moveSelectedToLayer(int index);
 };
 
-#endif // MAINWINDOW_H
+#endif 

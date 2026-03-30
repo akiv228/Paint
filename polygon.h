@@ -31,4 +31,4 @@ private:
     QRectF boundingRect() const;
 };
 
-#endif // POLYGON_H
+#endif 

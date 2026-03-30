@@ -3,4 +3,4 @@
 
 enum FigureType { kTriangle, kCircle, kRhombus, kSquare, kRectangle, kStar, kPolygon, kTrapezoid, kLine, kPolyline, kEllipse };
 
-#endif // FIGURETYPE_H
+#endif 

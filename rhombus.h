@@ -22,4 +22,4 @@ private:
     QPainterPath shape() const;
 };
 
-#endif // RHOMBUS_H
+#endif 

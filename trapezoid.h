@@ -22,4 +22,4 @@ private:
     QPainterPath shape() const;
 };
 
-#endif // TRAPEZOID_H
+#endif 

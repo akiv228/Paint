@@ -25,4 +25,4 @@ private:
     QRectF boundingRect() const;
 };
 
-#endif // CIRCLE_H
+#endif 

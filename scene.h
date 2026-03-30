@@ -10,6 +10,14 @@
 #include "ellipse.h"
 #include "layer.h"
 
+
+struct UndoStateItem {
+    Figure* figure;   
+    int layerIndex;   
+
+    UndoStateItem(Figure* fig = nullptr, int idx = -1) : figure(fig), layerIndex(idx) {}
+};
+
 class Scene : public QGraphicsScene
 {
     Q_OBJECT
@@ -39,7 +47,7 @@ public:
     void redo();
     void rotateSelected(qreal deltaAngle);
 
-    // Управление слоями
+    
     void addLayer(const QString &name);
     void removeLayer(int index);
     void moveLayerUp(int index);
@@ -50,13 +58,17 @@ public:
     void setCurrentLayer(int index);
     void moveFigureToLayer(Figure *figure, int layerIndex);
 
+    QList<Figure*> selectedFigures() const { return selectedFigures_; }
+    void moveSelectedFiguresToLayer(int layerIndex);
+    void scaleSelectedFigures(qreal factor);
+    
 
 signals:
     void figureTypeChanged();
     void layersChanged();
 
 private:
-    Figure *currentFigure_;
+    Figure *currentFigure_ = nullptr;
     QList<Figure*> selectedFigures_;
     FigureType figureType_;
     QColor currentPenColor_;
@@ -79,19 +91,24 @@ private:
     bool isBuildingPolyline_ = false;
     Polyline *buildingPolyline_ = nullptr;
 
-    QVector<QList<Figure*>> undoStack_;
-    QVector<QList<Figure*>> redoStack_;
+    
+    QList<QList<UndoStateItem>> undoStack_;
+    QList<QList<UndoStateItem>> redoStack_;
 
     QList<Layer*> layers_;
     int currentLayerIndex_ = -1;
 
+    
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+
     Figure *figureAt(QPointF point);
     bool onRectBoard(QRectF rect, QPointF point, int &side);
-    void restoreState(const QList<Figure*>& state);
+
+    void restoreState(const QList<UndoStateItem>& state);  
+
     void clearSelection();
     void addToSelection(Figure *fig);
     void removeFromSelection(Figure *fig);
@@ -100,4 +117,4 @@ private:
     void updateZOrder();
 };
 
-#endif // SCENE_H
+#endif 

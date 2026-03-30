@@ -39,28 +39,48 @@ void Scene::setFigureType(const FigureType type)
 void Scene::setPenColor(QColor color)
 {
     currentPenColor_ = color;
+    
+    QList<Figure*> savedSelection = selectedFigures_;
     applyToAllSelected([color](Figure *fig) {
         fig->setPenColor(color);
         fig->update();
     });
+    
+    for (Figure *fig : savedSelection) {
+        if (isSelected(fig)) {
+            addToSelection(fig);
+        }
+    }
 }
 
 void Scene::setBrushColor(QColor color)
 {
     currentBrushColor_ = color;
+    QList<Figure*> savedSelection = selectedFigures_;
     applyToAllSelected([color](Figure *fig) {
         fig->setBrushColor(color);
         fig->update();
     });
+    for (Figure *fig : savedSelection) {
+        if (isSelected(fig)) {
+            addToSelection(fig);
+        }
+    }
 }
 
 void Scene::setPenWidth(qreal width)
 {
     currentPenWidth_ = width;
+    QList<Figure*> savedSelection = selectedFigures_;
     applyToAllSelected([width](Figure *fig) {
         fig->setPenWidth(width);
         fig->update();
     });
+    for (Figure *fig : savedSelection) {
+        if (isSelected(fig)) {
+            addToSelection(fig);
+        }
+    }
 }
 
 qreal Scene::getPenWidth()
@@ -82,12 +102,12 @@ void Scene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
         return;
     }
 
-    // Ищем фигуру только на текущем слое
+    
     Figure *temp_figure = nullptr;
     QList<QGraphicsItem*> itemsAtPos = items(event->scenePos());
     for (QGraphicsItem *item : itemsAtPos) {
         Figure *fig = dynamic_cast<Figure*>(item);
-        if (fig && fig->layer() == currentLayer()) {
+        if (fig && fig->layer() && fig->layer() == currentLayer()) {
             temp_figure = fig;
             break;
         }
@@ -102,7 +122,7 @@ void Scene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
     }
     else
     {
-        // Двойной клик вне фигуры – снимаем выделение
+        
         clearSelection();
     }
     this->update(QRectF(0, 0, this->width(), this->height()));
@@ -110,6 +130,7 @@ void Scene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 
 void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+    
     if (isBuildingPolyline_)
     {
         if (buildingPolyline_)
@@ -124,15 +145,17 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         return;
     }
 
+    
     if (event->button() == Qt::RightButton)
     {
         Figure *clicked = nullptr;
-        QList<QGraphicsItem*> itemsAtPos = items(event->scenePos());
-        for (QGraphicsItem *item : itemsAtPos) {
-            Figure *fig = dynamic_cast<Figure*>(item);
-            if (fig && fig->layer() == currentLayer()) {
-                clicked = fig;
-                break;
+        
+        if (currentLayer()) {
+            for (Figure *fig : currentLayer()->figures()) {
+                if (fig->boundingRect().contains(fig->mapFromScene(event->scenePos()))) {
+                    clicked = fig;
+                    break;
+                }
             }
         }
         if (clicked) {
@@ -144,40 +167,85 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         return;
     }
 
-    // Левая кнопка
-    QList<QGraphicsItem*> itemsAtPos = items(event->scenePos());
+    
+    
     Figure *clicked = nullptr;
-    for (QGraphicsItem *item : itemsAtPos) {
-        Figure *fig = dynamic_cast<Figure*>(item);
-        if (fig && fig->layer() == currentLayer()) {
-            clicked = fig;
-            break;
+    if (currentLayer()) {
+        QList<Figure*> candidates;
+        for (Figure *fig : currentLayer()->figures()) {
+            if (fig->boundingRect().contains(fig->mapFromScene(event->scenePos())))
+                candidates.append(fig);
+        }
+        if (!candidates.isEmpty()) {
+            
+            std::sort(candidates.begin(), candidates.end(),
+                      [](Figure *a, Figure *b) { return a->zValue() > b->zValue(); });
+            clicked = candidates.first();
         }
     }
 
+    
+    qDebug() << "Clicked figure:" << (void*)clicked
+             << "layer:" << (clicked ? clicked->layer() : nullptr)
+             << "scene:" << (clicked ? clicked->scene() : nullptr)
+             << "currentLayer:" << currentLayer();
+
+    if (clicked == nullptr) {
+        QList<QGraphicsItem*> all = items();
+        qDebug() << "No figure under cursor. Total items:" << all.size();
+        for (QGraphicsItem* item : all) {
+            Figure* fig = dynamic_cast<Figure*>(item);
+            if (fig) {
+                qDebug() << "  Figure" << (void*)fig
+                         << "layer:" << fig->layer()
+                         << "boundingRect:" << fig->boundingRect()
+                         << "scenePos of item:" << item->scenePos();
+            }
+        }
+    }
+
+    
     if (clicked != nullptr) {
+        
+        if (clicked->scene() != this) {
+            qWarning() << "Figure is not on this scene, ignoring";
+            return;
+        }
+
+        
+        if (clicked->layer() == nullptr && currentLayer()) {
+            qWarning() << "Figure has no layer, reassigning to current layer";
+            currentLayer()->addFigure(clicked);
+        }
+
+        
+        if (clicked->layer() != currentLayer()) {
+            qDebug() << "Figure layer doesn't match current layer, ignoring";
+            return;
+        }
+
+        
         bool shiftPressed = (event->modifiers() & Qt::ShiftModifier);
         bool ctrlPressed = (event->modifiers() & Qt::ControlModifier);
-        
+
         if (!shiftPressed && !ctrlPressed) {
-            // Если фигура уже выделена, не очищаем выделение, иначе очищаем
             if (!isSelected(clicked)) {
                 clearSelection();
             }
         }
-        
+
         if (shiftPressed) {
             if (isSelected(clicked))
                 removeFromSelection(clicked);
             else
                 addToSelection(clicked);
         } else if (ctrlPressed) {
-            // Режим вращения по Ctrl + клик внутри фигуры
             if (!isSelected(clicked)) {
                 clearSelection();
                 addToSelection(clicked);
             }
-            // Устанавливаем режим вращения
+
+            
             if (selectedFigures_.size() == 1) {
                 rotationCenter_ = clicked->mapToScene(clicked->boundingRect().center());
             } else {
@@ -194,12 +262,12 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
             clicked->update();
             return;
         } else {
-            // Обычный клик без модификаторов
             if (!isSelected(clicked)) {
                 addToSelection(clicked);
             }
         }
 
+        
         if (!selectedFigures_.isEmpty() && isSelected(clicked) && mode_ != kRotating) {
             Figure *selected = clicked;
             QPointF local_pos = selected->mapFromScene(event->scenePos());
@@ -207,7 +275,9 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                 mode_ = kChanging;
                 selectedStartPoint_ = selected->getStartPoint();
                 selectedEndPoint_ = selected->getEndPoint();
-            } else if (selected->shape().contains(local_pos)) {
+            }
+            
+            else if (selected->boundingRect().contains(local_pos)) {
                 mode_ = kMoving;
                 pressPos_ = event->scenePos();
             }
@@ -216,15 +286,12 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         return;
     }
 
-    // Клик по пустому месту левой кнопкой
+    
     bool shiftPressed = (event->modifiers() & Qt::ShiftModifier);
     if (shiftPressed) {
-        // Если shift нажат, не создаём новую фигуру
-        return;
+        return; 
     }
-    // Выделение НЕ снимается при одинарном клике вне фигуры
 
-    // Создание новой фигуры
     switch (figureType_)
     {
     case kTriangle:
@@ -258,22 +325,22 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         currentFigure_ = new Ellipse(event->scenePos());
         break;
     case kPolyline:
-        {
-            Polyline *polyline = new Polyline(event->scenePos());
-            currentFigure_ = polyline;
-            buildingPolyline_ = polyline;
-            isBuildingPolyline_ = true;
-            buildingPolyline_->setBuilding(true);
-            polyline->setPenColor(currentPenColor_);
-            polyline->setBrushColor(currentBrushColor_);
-            polyline->setPenWidth(currentPenWidth_);
-            this->addItem(currentFigure_);
-            currentFigure_->updateTransformOriginPoint();
-            if (currentLayer())
-                currentLayer()->addFigure(currentFigure_);
-            currentAdded_ = true;
-            return;
-        }
+    {
+        Polyline *polyline = new Polyline(event->scenePos());
+        currentFigure_ = polyline;
+        buildingPolyline_ = polyline;
+        isBuildingPolyline_ = true;
+        buildingPolyline_->setBuilding(true);
+        polyline->setPenColor(currentPenColor_);
+        polyline->setBrushColor(currentBrushColor_);
+        polyline->setPenWidth(currentPenWidth_);
+        this->addItem(currentFigure_);
+        currentFigure_->updateTransformOriginPoint();
+        if (currentLayer())
+            currentLayer()->addFigure(currentFigure_);
+        currentAdded_ = true;
+        return;
+    }
     default:
         currentFigure_ = new Triangle(event->scenePos());
         break;
@@ -283,14 +350,35 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
     currentFigure_->setPenColor(currentPenColor_);
     currentFigure_->setBrushColor(currentBrushColor_);
     currentFigure_->setPenWidth(currentPenWidth_);
-    if (currentLayer())
-        currentLayer()->addFigure(currentFigure_);
+
+    Layer* targetLayer = currentLayer();
+    qDebug() << "mousePressEvent: targetLayer =" << (void*)targetLayer
+             << "layers_.size() =" << layers_.size()
+             << "currentLayerIndex_ =" << currentLayerIndex_;
+
+    if (!targetLayer && !layers_.isEmpty()) {
+        targetLayer = layers_.first();
+        setCurrentLayer(0);
+        qDebug() << "currentLayer was null, using first layer, new targetLayer =" << (void*)targetLayer;
+    }
+
+    if (targetLayer) {
+        qDebug() << "Calling targetLayer->addFigure for new figure";
+        targetLayer->addFigure(currentFigure_);
+        qDebug() << "After addFigure, figure layer:" << (void*)(currentFigure_->layer());
+        if (!currentFigure_->layer()) {
+            qWarning() << "CRITICAL: figure layer is null after addFigure!";
+        }
+    }
+
     currentAdded_ = false;
     this->update(QRectF(0, 0, this->width(), this->height()));
 }
 
+
 void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
+    
     if (isBuildingPolyline_ && buildingPolyline_)
     {
         buildingPolyline_->setTempPoint(event->scenePos());
@@ -321,7 +409,6 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
             if (angle_delta != 0)
             {
-                // Для каждой фигуры – вращение вокруг её собственного центра
                 for (Figure *fig : selectedFigures_) {
                     fig->setTransformOriginPoint(fig->boundingRect().center());
                     fig->setRotation(fig->rotation() + angle_delta);
@@ -448,6 +535,7 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     }
     else
     {
+        
         if (!currentAdded_ && currentFigure_)
         {
             this->addItem(currentFigure_);
@@ -463,14 +551,22 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void Scene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
+    qDebug() << "mouseReleaseEvent: currentFigure_ =" << (void*)currentFigure_
+             << "currentAdded_ =" << currentAdded_
+             << "isBuildingPolyline_ =" << isBuildingPolyline_;
     mode_ = kDrawing;
     selectedPointIndex_ = 0;
 
-    if (currentAdded_ && currentFigure_ && !isBuildingPolyline_)
+    
+    if (currentAdded_ && currentFigure_ && !isBuildingPolyline_ && currentFigure_->scene() == this)
     {
         pushUndoState();
     }
+    
     rotationCenter_ = QPointF();
+    
+    
+    
 }
 
 void Scene::cancelPolylineBuilding()
@@ -535,7 +631,7 @@ qreal Scene::getSelectedFigureSquare(bool &ok)
 
 void Scene::removeAllItems()
 {
-    // Снимаем выделение, чтобы selectedFigures_ опустела
+    
     clearSelection();
 
     pushUndoState();
@@ -652,104 +748,6 @@ void Scene::scaleSelectedFigure(qreal factor)
     selected->update();
 }
 
-// void Scene::copySelectedFigure()
-// {
-//     if (selectedFigures_.isEmpty()) return;
-
-//     QList<Figure*> copies;
-
-//     for (Figure *original : selectedFigures_) {
-//         FigureType type = original->getFigureType();
-//         Figure *copy = nullptr;
-
-//         switch (type) {
-//         case kTriangle:
-//             copy = new Triangle(original->getStartPoint());
-//             break;
-//         case kCircle:
-//             copy = new Circle(original->getStartPoint());
-//             break;
-//         case kRhombus:
-//             copy = new Rhombus(original->getStartPoint());
-//             break;
-//         case kSquare:
-//             copy = new Square(original->getStartPoint());
-//             break;
-//         case kRectangle:
-//             copy = new Rectangle(original->getStartPoint());
-//             break;
-//         case kStar:
-//             copy = new Star(original->getStartPoint());
-//             break;
-//         case kPolygon:
-//             copy = new Polygon(original->getStartPoint());
-//             break;
-//         case kTrapezoid:
-//             copy = new Trapezoid(original->getStartPoint());
-//             break;
-//         case kLine:
-//             copy = new Line(original->getStartPoint());
-//             break;
-//         case kEllipse:
-//             copy = new Ellipse(original->getStartPoint());
-//             break;
-//         case kPolyline:
-//             {
-//                 Polyline *origPoly = dynamic_cast<Polyline*>(original);
-//                 if (origPoly) {
-//                     copy = new Polyline(original->getStartPoint());
-//                     Polyline *copyPoly = dynamic_cast<Polyline*>(copy);
-//                     if (copyPoly) {
-//                         copyPoly->setPoints(origPoly->points());
-//                     }
-//                 }
-//             }
-//             break;
-//         default:
-//             continue;
-//         }
-
-//         if (!copy) continue;
-
-//         // Копируем свойства фигуры
-//         copy->setPenColor(original->getPenColor());
-//         copy->setBrushColor(original->getBrushColor());
-//         copy->setPenWidth(original->getPenWidth());
-//         copy->setStartPoint(original->getStartPoint());
-//         copy->setEndPoint(original->getEndPoint());
-//         copy->setPos(original->pos() + QPointF(20, 20)); // смещаем
-//         copy->setRotation(original->rotation());
-//         copy->setTransformOriginPoint(original->transformOriginPoint());
-
-//         // Добавляем на сцену и слой
-//         addItem(copy);
-//         if (currentLayer())
-//             currentLayer()->addFigure(copy);
-
-//         copies.append(copy);
-//     }
-
-//     if (copies.isEmpty()) return;
-
-//     // Сохраняем состояние для undo
-//     pushUndoState();
-
-//     // Снимаем выделение с оригиналов
-//     for (Figure *original : selectedFigures_) {
-//         original->un_select();
-//         original->update();
-//     }
-//     clearSelection();
-
-//     // Выделяем новые копии
-//     for (Figure *copy : copies) {
-//         addToSelection(copy);
-//         copy->update();
-//     }
-
-//     update();
-// }
-
 
 void Scene::copySelectedFigure()
 {
@@ -761,10 +759,10 @@ void Scene::copySelectedFigure()
         Figure *copy = original->clone();
         if (!copy) continue;
 
-        // Смещаем копию на 20 пикселей вправо и вниз
+        
         copy->setPos(original->pos() + QPointF(20, 20));
 
-        // Добавляем на сцену и на текущий слой
+        
         addItem(copy);
         if (currentLayer())
             currentLayer()->addFigure(copy);
@@ -776,14 +774,14 @@ void Scene::copySelectedFigure()
 
     pushUndoState();
 
-    // Снимаем выделение с оригиналов
+    
     for (Figure *original : selectedFigures_) {
         original->un_select();
         original->update();
     }
     clearSelection();
 
-    // Выделяем новые копии
+    
     for (Figure *copy : copies) {
         addToSelection(copy);
         copy->update();
@@ -795,52 +793,121 @@ void Scene::copySelectedFigure()
 
 void Scene::pushUndoState()
 {
-    QList<Figure*> state;
+    QList<UndoStateItem> state;
     foreach (QGraphicsItem* item, items()) {
         Figure* fig = dynamic_cast<Figure*>(item);
-        if (fig)
-            state.append(fig->clone());
+        if (fig && fig->scene() == this) {
+            int layerIndex = -1;
+            if (fig->layer()) {
+                layerIndex = layers_.indexOf(fig->layer());
+            } else {
+                qWarning() << "pushUndoState: figure has no layer, skipping?";
+                continue;
+            }
+            state.append(UndoStateItem(fig->clone(), layerIndex));
+        }
     }
     undoStack_.append(state);
     redoStack_.clear();
 }
 
-void Scene::restoreState(const QList<Figure*>& state)
+void Scene::restoreState(const QList<UndoStateItem>& state)
 {
-    clear();
+    qDebug() << "restoreState: restoring" << state.size() << "figures";
+
     clearSelection();
-    foreach (Figure* fig, state) {
-        addItem(fig);
+
+    if (isBuildingPolyline_ && buildingPolyline_) {
+        delete buildingPolyline_;
+        buildingPolyline_ = nullptr;
+        isBuildingPolyline_ = false;
     }
+    currentFigure_ = nullptr;
+    currentAdded_ = false;
+    mode_ = kDrawing;
+
+    for (Layer* layer : layers_) {
+        layer->clear();
+    }
+    clear();
+
+    for (const UndoStateItem& item : state) {
+        Figure* fig = item.figure;
+        int layerIndex = item.layerIndex;
+
+        Layer* targetLayer = nullptr;
+        if (layerIndex >= 0 && layerIndex < layers_.size()) {
+            targetLayer = layers_[layerIndex];
+        } else {
+            targetLayer = currentLayer();
+            if (!targetLayer && !layers_.isEmpty())
+                targetLayer = layers_.first();
+        }
+
+        if (targetLayer) {
+            targetLayer->addFigure(fig);
+        } else {
+            qWarning() << "No target layer for figure!";
+        }
+        
+        
+        fig->prepareGeometryChangePublic(); 
+        addItem(fig);
+        
+        
+        fig->updateTransformOriginPoint();
+        fig->update();
+    }
+
     update();
 }
 
 void Scene::undo()
 {
     if (undoStack_.isEmpty()) return;
-    QList<Figure*> currentState;
+
+    QList<UndoStateItem> currentState;
     foreach (QGraphicsItem* item, items()) {
         Figure* fig = dynamic_cast<Figure*>(item);
-        if (fig)
-            currentState.append(fig->clone());
+        if (fig) {
+            int layerIndex = layers_.indexOf(fig->layer());
+            currentState.append(UndoStateItem(fig->clone(), layerIndex));
+        }
     }
     redoStack_.append(currentState);
-    QList<Figure*> prevState = undoStack_.takeLast();
+
+    QList<UndoStateItem> prevState = undoStack_.takeLast();
     restoreState(prevState);
+    
+    
+    currentFigure_ = nullptr;
+    currentAdded_ = false;
+    isBuildingPolyline_ = false;
+    buildingPolyline_ = nullptr;
 }
 
 void Scene::redo()
 {
     if (redoStack_.isEmpty()) return;
-    QList<Figure*> currentState;
+
+    QList<UndoStateItem> currentState;
     foreach (QGraphicsItem* item, items()) {
         Figure* fig = dynamic_cast<Figure*>(item);
-        if (fig)
-            currentState.append(fig->clone());
+        if (fig) {
+            int layerIndex = layers_.indexOf(fig->layer());
+            currentState.append(UndoStateItem(fig->clone(), layerIndex));
+        }
     }
     undoStack_.append(currentState);
-    QList<Figure*> nextState = redoStack_.takeLast();
+
+    QList<UndoStateItem> nextState = redoStack_.takeLast();
     restoreState(nextState);
+    
+    
+    currentFigure_ = nullptr;
+    currentAdded_ = false;
+    isBuildingPolyline_ = false;
+    buildingPolyline_ = nullptr;
 }
 
 void Scene::clearSelection()
@@ -895,7 +962,7 @@ void Scene::removeLayer(int index) {
 
     Layer *layer = layers_[index];
 
-    // Удаляем все выделенные фигуры, принадлежащие этому слою, из selectedFigures_
+    
     for (Figure *fig : layer->figures()) {
         if (selectedFigures_.contains(fig)) {
             selectedFigures_.removeOne(fig);
@@ -903,10 +970,10 @@ void Scene::removeLayer(int index) {
         }
     }
 
-    // Удаляем слой из массива (без удаления объектов, только из списка)
+    
     layers_.removeAt(index);
 
-    // Удаляем все фигуры слоя из сцены и освобождаем память
+    
     for (Figure *figure : layer->figures()) {
         if (figure->scene() == this) {
             removeItem(figure);
@@ -914,13 +981,13 @@ void Scene::removeLayer(int index) {
         delete figure;
     }
 
-    // Очищаем список фигур в слое, чтобы деструктор не удалял их повторно
+    
     layer->clear();
 
-    // Удаляем сам объект слоя
+    
     delete layer;
 
-    // Корректируем currentLayerIndex_
+    
     if (layers_.isEmpty()) {
         addLayer("Layer 1");
         currentLayerIndex_ = 0;
@@ -994,7 +1061,7 @@ void Scene::updateZOrder()
 {
     const int layerCount = layers_.size();
     for (int i = 0; i < layerCount; ++i) {
-        // Самый верхний слой (i=0) получает максимальный Z-баз
+        
         int zBase = (layerCount - 1 - i) * 1000;
         layers_[i]->setZBase(zBase);
     }
@@ -1005,7 +1072,7 @@ void Scene::rotateSelected(qreal deltaAngle)
 {
     if (selectedFigures_.isEmpty()) return;
 
-    // Для каждой фигуры – вращение вокруг её собственного центра
+    
     for (Figure *fig : selectedFigures_) {
         fig->setTransformOriginPoint(fig->boundingRect().center());
         fig->setRotation(fig->rotation() + deltaAngle);
@@ -1013,3 +1080,64 @@ void Scene::rotateSelected(qreal deltaAngle)
     update();
 }
 
+
+
+void Scene::moveSelectedFiguresToLayer(int layerIndex)
+{
+    if (layerIndex < 0 || layerIndex >= layers_.size()) return;
+    for (Figure *fig : selectedFigures_) {
+        moveFigureToLayer(fig, layerIndex);
+    }
+    update();
+}
+
+
+
+
+void Scene::scaleSelectedFigures(qreal factor)
+{
+    if (selectedFigures_.isEmpty()) return;
+    
+    for (Figure *fig : selectedFigures_) {
+        FigureType type = fig->getFigureType();
+        
+        if (type == kLine) {
+            Line *line = dynamic_cast<Line*>(fig);
+            if (line) {
+                QPointF center = line->boundingRect().center();
+                QPointF start = line->getStartPoint();
+                QPointF end = line->getEndPoint();
+                QPointF newStart = center + (start - center) * factor;
+                QPointF newEnd = center + (end - center) * factor;
+                line->setStartPoint(newStart);
+                line->setEndPoint(newEnd);
+            }
+        }
+        else if (type == kPolyline) {
+            Polyline *polyline = dynamic_cast<Polyline*>(fig);
+            if (polyline) {
+                QPointF center = polyline->boundingRect().center();
+                QPolygonF points = polyline->points();
+                for (int i = 0; i < points.size(); ++i) {
+                    points[i] = center + (points[i] - center) * factor;
+                }
+                polyline->setPoints(points);
+            }
+        }
+        else {
+            
+            QPointF center = fig->boundingRect().center();
+            QPointF start = fig->getStartPoint();
+            QPointF end = fig->getEndPoint();
+            QPointF newStart = center + (start - center) * factor;
+            QPointF newEnd = center + (end - center) * factor;
+            fig->setStartPoint(newStart);
+            fig->setEndPoint(newEnd);
+        }
+        
+        fig->updateTransformOriginPoint();
+        fig->update();
+    }
+    
+    update();
+}

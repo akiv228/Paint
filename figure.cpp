@@ -100,6 +100,9 @@ void Figure::drawSelectFrame(QPainter *painter)
 
 void Figure::setLayer(Layer *layer)
 {
+    qDebug() << "Figure::setLayer: this =" << (void*)this
+             << "old layer =" << (void*)layer_
+             << "new layer =" << (void*)layer;
     layer_ = layer;
 }
 

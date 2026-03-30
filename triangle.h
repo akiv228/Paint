@@ -2,7 +2,6 @@
 #define TRIANGLE_H
 
 #include "figure.h"
-
 #include "figureType.h"
 
 class Triangle : public Figure
@@ -11,19 +10,25 @@ class Triangle : public Figure
 
 public:
     explicit Triangle(QPointF point, QObject *parent = nullptr);
-
-    qreal getPerimeter();
-    qreal getSquare();
-    FigureType getFigureType();
+    void prepareGeometryChangePublic() {
+        prepareGeometryChange();
+    }
+    
+    qreal getPerimeter() override;
+    qreal getSquare() override;
+    FigureType getFigureType() override;
     QPointF getCenterOfMass() const override;
     Figure* clone() const override;
     QRectF boundingRect() const override;
 
-private:
-    QPolygonF polygon_;
+protected:
+    
+    QPolygonF getPolygon() const;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    QPainterPath shape() const override;
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    QPainterPath shape() const;
+private:
+    mutable QPolygonF polygon_;  
 };
 
-#endif // TRIANGLE_H
+#endif 

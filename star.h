@@ -31,4 +31,4 @@ private:
     QRectF boundingRect() const;
 };
 
-#endif // STAR_H
+#endif 

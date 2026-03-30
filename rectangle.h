@@ -22,4 +22,4 @@ private:
     QPainterPath shape() const;
 };
 
-#endif // RECTANGLE_H
+#endif 

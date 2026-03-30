@@ -9,10 +9,10 @@ Circle::Circle(QPointF point, QObject *parent)
 void Circle::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     painterInit(painter);
-    // a = qAbs(getEndPoint().x() - getStartPoint().x());
-    // b = qAbs(getEndPoint().y() - getStartPoint().y());
+    
+    
     radius_ = std::sqrt(std::pow(getEndPoint().x() - getStartPoint().x(), 2) + std::pow(getEndPoint().y() - getStartPoint().y(), 2));
-    // painter->drawEllipse(mapToScene(getStartPoint()), radius, radius);
+    
     painter->drawEllipse(getStartPoint(), radius_, radius_);
 }
 
@@ -64,5 +64,6 @@ Figure* Circle::clone() const
     copy->setPos(pos());
     copy->setRotation(rotation());
     copy->setTransformOriginPoint(transformOriginPoint());
+    copy->setLayer(layer_);
     return copy;
 }

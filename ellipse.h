@@ -19,4 +19,4 @@ private:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 };
 
-#endif // ELLIPSE_H
+#endif 

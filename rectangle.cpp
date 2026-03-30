@@ -71,5 +71,6 @@ Figure* Rectangle::clone() const
     copy->setPos(pos());
     copy->setRotation(rotation());
     copy->setTransformOriginPoint(transformOriginPoint());
+    copy->setLayer(layer_);
     return copy;
 }

@@ -1,23 +1,20 @@
-// polyline.h (не меняется, только при необходимости добавить метод)
-// polyline.cpp
 
 #include "polyline.h"
 #include <cmath>
 #include <QPainterPathStroker>
 
 Polyline::Polyline(QPointF point, QObject *parent)
-    : Figure{QPointF(), parent} // позиция будет (0,0)
+    : Figure{QPointF(), parent}
 {
-    setPos(point);               // фигура находится в точке point
-    points_ << QPointF(0,0);     // первая точка локально (0,0)
+    setPos(point);
+    points_ << QPointF(0, 0);
     updateTransformOriginPoint();
 }
 
 void Polyline::addPoint(const QPointF &point)
 {
-    // Преобразуем глобальные координаты в локальные (относительно позиции фигуры)
     points_ << mapFromScene(point);
-    prepareGeometryChange();
+    prepareGeometryChange();  
     update();
     updateTransformOriginPoint();
 }
@@ -45,34 +42,54 @@ void Polyline::paint(QPainter *painter, const QStyleOptionGraphicsItem * /*optio
 
 QRectF Polyline::boundingRect() const
 {
+    
     if (points_.isEmpty())
         return QRectF();
 
-    QRectF rect = QRectF(points_.first(), points_.first());
-    for (const QPointF &p : points_)
-        rect = rect.united(QRectF(p, p));
+    
+    qreal minX = points_.first().x();
+    qreal minY = points_.first().y();
+    qreal maxX = minX;
+    qreal maxY = minY;
 
-    if (isBuilding_ && !tempPoint_.isNull())
-        rect = rect.united(QRectF(tempPoint_, tempPoint_));
+    for (const QPointF &p : points_) {
+        if (p.x() < minX) minX = p.x();
+        if (p.x() > maxX) maxX = p.x();
+        if (p.y() < minY) minY = p.y();
+        if (p.y() > maxY) maxY = p.y();
+    }
 
-    // Добавляем запас для выделения (половина ширины пера + 5 пикселей)
-    qreal extra = (getPenWidth() + 5) / 2.0;
+    
+    if (isBuilding_ && !tempPoint_.isNull()) {
+        if (tempPoint_.x() < minX) minX = tempPoint_.x();
+        if (tempPoint_.x() > maxX) maxX = tempPoint_.x();
+        if (tempPoint_.y() < minY) minY = tempPoint_.y();
+        if (tempPoint_.y() > maxY) maxY = tempPoint_.y();
+    }
+
+    
+    QRectF rect(minX, minY, maxX - minX, maxY - minY);
+
+    
+    
+    qreal extra = (getPenWidth() + 10) / 2.0;
     return rect.normalized().adjusted(-extra, -extra, extra, extra);
 }
 
 QPainterPath Polyline::shape() const
 {
     QPainterPath path;
-    if (points_.size() >= 2)
-    {
+    if (points_.size() >= 2) {
         path.moveTo(points_.first());
         for (int i = 1; i < points_.size(); ++i)
             path.lineTo(points_.at(i));
     }
     if (path.isEmpty())
         return path;
+
+    
     QPainterPathStroker stroker;
-    stroker.setWidth(getPenWidth() + 10); // увеличили запас
+    stroker.setWidth(getPenWidth() + 10);
     QPainterPath stroked = stroker.createStroke(path);
     return stroked;
 }
@@ -80,8 +97,7 @@ QPainterPath Polyline::shape() const
 qreal Polyline::getPerimeter()
 {
     qreal perimeter = 0.0;
-    for (int i = 0; i < points_.size() - 1; ++i)
-    {
+    for (int i = 0; i < points_.size() - 1; ++i) {
         QLineF seg(points_.at(i), points_.at(i + 1));
         perimeter += seg.length();
     }
@@ -101,7 +117,7 @@ FigureType Polyline::getFigureType()
 void Polyline::setPoints(const QPolygonF &points)
 {
     points_ = points;
-    prepareGeometryChange();
+    prepareGeometryChange();  
     update();
     updateTransformOriginPoint();
 }
@@ -116,5 +132,6 @@ Figure* Polyline::clone() const
     copy->setPos(pos());
     copy->setRotation(rotation());
     copy->setTransformOriginPoint(transformOriginPoint());
+    copy->setLayer(layer_);
     return copy;
 }

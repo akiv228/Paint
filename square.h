@@ -25,4 +25,4 @@ private:
     QRectF boundingRect() const;
 };
 
-#endif // SQUARE_H
+#endif 
