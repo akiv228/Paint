@@ -1101,7 +1101,6 @@ void Scene::moveSelectedFiguresToLayer(int layerIndex)
 void Scene::scaleSelectedFigures(qreal factor)
 {
     if (selectedFigures_.isEmpty()) return;
-    pushUndoState();   
     for (Figure *fig : selectedFigures_) {
         FigureType type = fig->getFigureType();
         

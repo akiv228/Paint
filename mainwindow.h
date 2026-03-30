@@ -35,6 +35,9 @@ private:
     void resizeEvent(QResizeEvent *event);
     void keyPressEvent(QKeyEvent *event);
 
+    QTimer* scaleUndoTimer_;
+    bool scaleUndoPending_ = false;
+
 private slots:
     void timerSlot();
     void handleTriangleButton();
@@ -55,7 +58,7 @@ private slots:
     void handleEllipseButton();
     void undo();
     void redo();
-
+    void resetScaleUndoFlag(); 
     void handleAddLayer();
     void handleRemoveLayer();
     void handleLayerUp();
@@ -63,6 +66,7 @@ private slots:
     void updateLayerList();
     void setCurrentLayer(int index);
     void moveSelectedToLayer(int index);
+    
 };
 
 #endif 

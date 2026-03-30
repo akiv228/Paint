@@ -69,7 +69,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui_->linePushButton, &QPushButton::clicked, this, &MainWindow::handleLineButton);
     connect(ui_->polylinePushButton, &QPushButton::clicked, this, &MainWindow::handlePolylineButton);
     connect(ui_->ellipsePushButton, &QPushButton::clicked, this, &MainWindow::handleEllipseButton);
-
+    
+    scaleUndoTimer_ = new QTimer(this);
+    scaleUndoTimer_->setSingleShot(true);
+    connect(scaleUndoTimer_, &QTimer::timeout, this, &MainWindow::resetScaleUndoFlag);
 
     QToolBar *layerToolBar = addToolBar("Layers");
     layerToolBar->addAction("Add Layer", this, &MainWindow::handleAddLayer);
@@ -101,8 +104,14 @@ void MainWindow::wheelEvent(QWheelEvent *event)
     {
         qreal factor = 1.0 + event->angleDelta().y() / 1200.0;
         if (factor > 0.1 && factor < 10.0) {
-            scene_->pushUndoState();
+            
+            if (!scaleUndoPending_) {
+                scene_->pushUndoState();
+                scaleUndoPending_ = true;
+            }
             scene_->scaleSelectedFigures(factor);
+            
+            scaleUndoTimer_->start(200);
         }
     }
     event->accept();
@@ -397,4 +406,10 @@ void MainWindow::moveSelectedToLayer(int index)
     if (index < 0) return;
     scene_->moveSelectedFiguresToLayer(index);
     scene_->update();
+}
+
+
+void MainWindow::resetScaleUndoFlag()
+{
+    scaleUndoPending_ = false;
 }
