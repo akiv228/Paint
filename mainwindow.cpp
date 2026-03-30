@@ -101,6 +101,7 @@ void MainWindow::wheelEvent(QWheelEvent *event)
     {
         qreal factor = 1.0 + event->angleDelta().y() / 1200.0;
         if (factor > 0.1 && factor < 10.0) {
+            scene_->pushUndoState();
             scene_->scaleSelectedFigures(factor);
         }
     }
@@ -269,6 +270,7 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
             delta = QPointF(0, 1);
         }
         if (event->key() == Qt::Key_Q) {
+            scene_->pushUndoState();
             scene_->rotateSelected(-5.0);
             event->accept();
             return;
@@ -278,7 +280,7 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
             return;
         }
         if (!delta.isNull()) {
-            
+            scene_->pushUndoState();
             for (Figure *fig : scene_->selectedFigures()) {
                 fig->setPos(fig->pos() + delta);
                 fig->update();

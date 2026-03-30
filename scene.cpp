@@ -38,6 +38,7 @@ void Scene::setFigureType(const FigureType type)
 
 void Scene::setPenColor(QColor color)
 {
+    pushUndoState();
     currentPenColor_ = color;
     
     QList<Figure*> savedSelection = selectedFigures_;
@@ -259,6 +260,7 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
             startAngle_ = std::atan2(start_vector.y(), start_vector.x()) * 180 / M_PI;
             pressPos_ = event->scenePos();
             mode_ = kRotating;
+            pushUndoState();
             clicked->update();
             return;
         } else {
@@ -275,11 +277,12 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                 mode_ = kChanging;
                 selectedStartPoint_ = selected->getStartPoint();
                 selectedEndPoint_ = selected->getEndPoint();
+                pushUndoState();
             }
-            
             else if (selected->boundingRect().contains(local_pos)) {
                 mode_ = kMoving;
                 pressPos_ = event->scenePos();
+                pushUndoState();
             }
             selected->update();
         }
@@ -1071,8 +1074,7 @@ void Scene::updateZOrder()
 void Scene::rotateSelected(qreal deltaAngle)
 {
     if (selectedFigures_.isEmpty()) return;
-
-    
+    pushUndoState();
     for (Figure *fig : selectedFigures_) {
         fig->setTransformOriginPoint(fig->boundingRect().center());
         fig->setRotation(fig->rotation() + deltaAngle);
@@ -1085,6 +1087,8 @@ void Scene::rotateSelected(qreal deltaAngle)
 void Scene::moveSelectedFiguresToLayer(int layerIndex)
 {
     if (layerIndex < 0 || layerIndex >= layers_.size()) return;
+    
+    pushUndoState();
     for (Figure *fig : selectedFigures_) {
         moveFigureToLayer(fig, layerIndex);
     }
@@ -1097,7 +1101,7 @@ void Scene::moveSelectedFiguresToLayer(int layerIndex)
 void Scene::scaleSelectedFigures(qreal factor)
 {
     if (selectedFigures_.isEmpty()) return;
-    
+    pushUndoState();   
     for (Figure *fig : selectedFigures_) {
         FigureType type = fig->getFigureType();
         
