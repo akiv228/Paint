@@ -2,6 +2,8 @@
 #include "polyline.h"
 #include <cmath>
 #include <QPainterPathStroker>
+#include <QJsonObject>
+#include <QJsonArray>
 
 Polyline::Polyline(QPointF point, QObject *parent)
     : Figure{QPointF(), parent}
@@ -109,7 +111,7 @@ qreal Polyline::getSquare()
     return 0.0;
 }
 
-FigureType Polyline::getFigureType()
+FigureType Polyline::getFigureType() const
 {
     return kPolyline;
 }
@@ -134,4 +136,28 @@ Figure* Polyline::clone() const
     copy->setTransformOriginPoint(transformOriginPoint());
     copy->setLayer(layer_);
     return copy;
+}
+
+
+QJsonObject Polyline::toJson() const {
+    QJsonObject obj = Figure::toJson();
+    QJsonArray pointsArray;
+    for (const QPointF &pt : points_) {
+        pointsArray.append(QJsonObject{{"x", pt.x()}, {"y", pt.y()}});
+    }
+    obj["points"] = pointsArray;
+    return obj;
+}
+
+void Polyline::fromJson(const QJsonObject &json) {
+    Figure::fromJson(json);
+    points_.clear();
+    if (json.contains("points")) {
+        QJsonArray arr = json["points"].toArray();
+        for (const QJsonValue &val : arr) {
+            QJsonObject pt = val.toObject();
+            points_.append(QPointF(pt["x"].toDouble(), pt["y"].toDouble()));
+        }
+    }
+    prepareGeometryChange();
 }

@@ -90,7 +90,7 @@ qreal Triangle::getSquare()
     return 0.5 * qAbs(sum);
 }
 
-FigureType Triangle::getFigureType()
+FigureType Triangle::getFigureType() const
 {
     return kTriangle;
 }

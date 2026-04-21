@@ -42,7 +42,7 @@ qreal Line::getSquare()
     return 0.0;
 }
 
-FigureType Line::getFigureType()
+FigureType Line::getFigureType() const
 {
     return kLine;
 }

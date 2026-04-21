@@ -11,7 +11,10 @@
 #include "line.h"
 #include "polyline.h"
 #include "ellipse.h"
-
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 #include <QGraphicsView>
 #include <QInputDialog>
 #include <qdebug.h>
@@ -1143,4 +1146,109 @@ void Scene::scaleSelectedFigures(qreal factor)
     }
     
     update();
+}
+
+
+void Scene::saveToFile(const QString &fileName)
+{
+    QJsonObject root;
+    QJsonArray layersArray;
+
+    for (Layer *layer : layers_) {
+        QJsonObject layerObj;
+        layerObj["name"] = layer->name();
+        layerObj["visible"] = layer->isVisible();
+
+        QJsonArray figuresArray;
+        for (Figure *fig : layer->figures()) {
+            figuresArray.append(fig->toJson());
+        }
+        layerObj["figures"] = figuresArray;
+        layersArray.append(layerObj);
+    }
+    root["layers"] = layersArray;
+    root["currentLayerIndex"] = currentLayerIndex_;
+
+    QFile file(fileName);
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(QJsonDocument(root).toJson());
+        file.close();
+    }
+}
+
+void Scene::loadFromFile(const QString &fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly))
+        return;
+
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    file.close();
+
+    if (!doc.isObject())
+        return;
+
+    QJsonObject root = doc.object();
+    QJsonArray layersArray = root["layers"].toArray();
+
+    // Словарь для быстрого поиска существующего слоя по имени
+    QMap<QString, Layer*> existingLayers;
+    for (Layer *layer : layers_) {
+        existingLayers[layer->name()] = layer;
+    }
+
+    // Запоминаем исходное количество слоёв, чтобы понять, сколько новых будет добавлено
+    int oldLayerCount = layers_.size();
+    QList<Layer*> newLayersCreated; // для отслеживания добавленных слоёв
+
+    for (const QJsonValue &layerVal : layersArray) {
+        QJsonObject layerObj = layerVal.toObject();
+        QString layerName = layerObj["name"].toString();
+        bool visible = layerObj["visible"].toBool(true);
+
+        Layer *targetLayer = nullptr;
+        if (existingLayers.contains(layerName)) {
+            // Используем существующий слой
+            targetLayer = existingLayers[layerName];
+            targetLayer->setVisible(visible); // обновляем видимость, если нужно
+        } else {
+            // Создаём новый слой
+            targetLayer = new Layer(layerName, this);
+            targetLayer->setVisible(visible);
+            layers_.append(targetLayer);
+            newLayersCreated.append(targetLayer);
+            existingLayers[layerName] = targetLayer; // добавляем в карту для возможных будущих слоёв с тем же именем
+        }
+
+        QJsonArray figuresArray = layerObj["figures"].toArray();
+        for (const QJsonValue &figVal : figuresArray) {
+            QJsonObject figObj = figVal.toObject();
+            Figure *fig = Figure::createFromJson(figObj);
+            if (fig) {
+                addItem(fig);
+                targetLayer->addFigure(fig);
+                fig->updateTransformOriginPoint();
+                fig->update();
+            }
+        }
+    }
+
+    // Восстанавливаем индекс текущего слоя с учётом того, что слои могли быть уже существующими
+    if (root.contains("currentLayerIndex")) {
+        int savedIndex = root["currentLayerIndex"].toInt();
+        if (savedIndex >= 0 && savedIndex < layersArray.size()) {
+            // Ищем имя слоя по сохранённому индексу
+            QJsonObject savedLayerObj = layersArray[savedIndex].toObject();
+            QString savedLayerName = savedLayerObj["name"].toString();
+            // Находим индекс этого слоя в общем списке layers_
+            int actualIndex = layers_.indexOf(existingLayers[savedLayerName]);
+            if (actualIndex >= 0)
+                setCurrentLayer(actualIndex);
+        }
+    }
+
+    updateZOrder();
+    update();
+    emit layersChanged();
+    pushUndoState();
 }

@@ -66,7 +66,9 @@ private slots:
     void updateLayerList();
     void setCurrentLayer(int index);
     void moveSelectedToLayer(int index);
-    
+    void on_actionSave_triggered();
+    void on_actionOpen_triggered();
+
 };
 
 #endif 

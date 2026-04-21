@@ -7,7 +7,7 @@
 #include "line.h"
 #include "polyline.h"
 #include "ellipse.h"
-
+#include <QFileDialog>
 #include <QInputDialog>
 #include <QTimer>
 #include <QKeyEvent>
@@ -53,6 +53,10 @@ MainWindow::MainWindow(QWidget *parent)
     statusTimer_ = new QTimer();
     connect(statusTimer_, &QTimer::timeout, this, &MainWindow::updateStatus);
     statusTimer_->start(constants::kTimerIntervalMs);
+
+    QToolBar *fileToolBar = addToolBar("File");
+    fileToolBar->addAction("Save", this, &MainWindow::on_actionSave_triggered);
+    fileToolBar->addAction("Open", this, &MainWindow::on_actionOpen_triggered);
 
     connect(ui_->trianglePushButton, &QPushButton::clicked, this, &MainWindow::handleTriangleButton);
     connect(ui_->circlePushButton, &QPushButton::clicked, this, &MainWindow::handleCircleButton);
@@ -412,4 +416,19 @@ void MainWindow::moveSelectedToLayer(int index)
 void MainWindow::resetScaleUndoFlag()
 {
     scaleUndoPending_ = false;
+}
+
+
+void MainWindow::on_actionSave_triggered()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, "Save Drawing", "", "JSON (*.json)");
+    if (!fileName.isEmpty())
+        scene_->saveToFile(fileName);
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Open Drawing", "", "JSON (*.json)");
+    if (!fileName.isEmpty())
+        scene_->loadFromFile(fileName);
 }

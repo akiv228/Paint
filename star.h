@@ -16,8 +16,9 @@ public:
     qreal getRadius();
     qreal getPerimeter();
     qreal getSquare();
-    FigureType getFigureType();
-
+    FigureType getFigureType() const override;
+    QJsonObject toJson() const override;
+    void fromJson(const QJsonObject &json) override;
     Figure* clone() const override;
 
 private:

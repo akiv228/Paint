@@ -1,5 +1,6 @@
 #include "star.h"
 #include <cmath>
+#include <QJsonObject>
 
 Star::Star(QPointF point, QObject *parent)
     : Figure{point, parent}
@@ -102,7 +103,7 @@ qreal Star::getSquare()
     return 0.5 * qAbs(sum);
 }
 
-FigureType Star::getFigureType()
+FigureType Star::getFigureType() const
 {
     return kStar;
 }
@@ -120,4 +121,17 @@ Figure* Star::clone() const
     copy->setTransformOriginPoint(transformOriginPoint());
     copy->setLayer(layer_);
     return copy;
+}
+
+
+QJsonObject Star::toJson() const {
+    QJsonObject obj = Figure::toJson();
+    obj["pointsCount"] = currentPointsCount_;
+    return obj;
+}
+
+void Star::fromJson(const QJsonObject &json) {
+    Figure::fromJson(json);
+    if (json.contains("pointsCount"))
+        currentPointsCount_ = json["pointsCount"].toInt();
 }

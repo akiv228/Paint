@@ -34,14 +34,16 @@ public:
     QRectF boundingRect() const override;
     virtual qreal getPerimeter() = 0;
     virtual qreal getSquare() = 0;
-    virtual FigureType getFigureType() = 0;
+    virtual FigureType getFigureType() const = 0;
     virtual QPointF getCenterOfMass() const;
     virtual Figure* clone() const = 0;
     QColor getPenColor() const { return penColor_; }
     QColor getBrushColor() const { return brushColor_; }
     qreal getPenWidth() const { return penWidth_; }
     void updateTransformOriginPoint();
-
+    virtual QJsonObject toJson() const;
+    virtual void fromJson(const QJsonObject &json);
+    static Figure* createFromJson(const QJsonObject &json);
     void setLayer(Layer *layer);
     Layer* layer() const;
     virtual ~Figure() = default;
@@ -65,5 +67,8 @@ protected:
 signals:
     void pointChanged();
 };
+
+QString figureTypeToString(FigureType type);
+FigureType figureTypeFromString(const QString &str);
 
 #endif 

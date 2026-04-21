@@ -13,7 +13,7 @@ public:
     qreal getRadius();
     qreal getPerimeter();
     qreal getSquare();
-    FigureType getFigureType();
+    FigureType getFigureType() const override;
 
     Figure* clone() const override;
 

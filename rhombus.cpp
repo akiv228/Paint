@@ -56,7 +56,7 @@ qreal Rhombus::getSquare()
     return 0.5 * qAbs(sum);
 }
 
-FigureType Rhombus::getFigureType()
+FigureType Rhombus::getFigureType() const
 {
     return kRhombus;
 }

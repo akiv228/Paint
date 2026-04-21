@@ -1,5 +1,8 @@
 #include "square.h"
-
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 #include <cmath>
 
 Square::Square(QPointF point, QObject *parent)
@@ -64,7 +67,7 @@ qreal Square::getSquare()
     return 0.5 * qAbs(sum);
 }
 
-FigureType Square::getFigureType()
+FigureType Square::getFigureType() const
 {
     return kSquare;
 }

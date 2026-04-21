@@ -25,7 +25,8 @@ class Scene : public QGraphicsScene
 
 public:
     explicit Scene(QObject *parent = nullptr);
-
+    void saveToFile(const QString &fileName);
+    void loadFromFile(const QString &fileName);
     FigureType getFigureType() const;
     void setFigureType(const FigureType type);
     void setPenColor(QColor color);

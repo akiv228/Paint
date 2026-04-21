@@ -1,5 +1,6 @@
 #include "polygon.h"
 #include <cmath>
+#include <QJsonObject>
 
 Polygon::Polygon(QPointF point, QObject *parent)
     : Figure{point, parent}
@@ -98,7 +99,7 @@ qreal Polygon::getSquare()
     return 0.5 * qAbs(sum);
 }
 
-FigureType Polygon::getFigureType()
+FigureType Polygon::getFigureType() const
 {
     return FigureType::kPolygon;
 }
@@ -116,4 +117,17 @@ Figure* Polygon::clone() const
     copy->setTransformOriginPoint(transformOriginPoint());
     copy->setLayer(layer_);
     return copy;
+}
+
+
+QJsonObject Polygon::toJson() const {
+    QJsonObject obj = Figure::toJson();
+    obj["pointsCount"] = currentPointsCount_;
+    return obj;
+}
+
+void Polygon::fromJson(const QJsonObject &json) {
+    Figure::fromJson(json);
+    if (json.contains("pointsCount"))
+        currentPointsCount_ = json["pointsCount"].toInt();
 }

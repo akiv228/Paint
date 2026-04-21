@@ -55,7 +55,7 @@ qreal Rectangle::getSquare()
     return 0.5 * qAbs(sum);
 }
 
-FigureType Rectangle::getFigureType()
+FigureType Rectangle::getFigureType() const
 {
     return kRectangle;
 }

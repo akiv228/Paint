@@ -139,7 +139,7 @@ qreal Trapezoid::getSquare()
 
 
 
-FigureType Trapezoid::getFigureType()
+FigureType Trapezoid::getFigureType() const
 {
     return kTrapezoid;
 }

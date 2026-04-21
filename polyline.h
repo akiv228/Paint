@@ -20,10 +20,11 @@ public:
     bool isBuilding() const { return isBuilding_; }
     void setBuilding(bool building) { isBuilding_ = building; }
 
-    
+    QJsonObject toJson() const override;
+    void fromJson(const QJsonObject &json) override;
     qreal getPerimeter() override;
     qreal getSquare() override;
-    FigureType getFigureType() override;
+    FigureType getFigureType() const override;
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
     Figure* clone() const override;

@@ -16,7 +16,7 @@ public:
     
     qreal getPerimeter() override;
     qreal getSquare() override;
-    FigureType getFigureType() override;
+    FigureType getFigureType() const override;
     QPointF getCenterOfMass() const override;
     Figure* clone() const override;
     QRectF boundingRect() const override;
