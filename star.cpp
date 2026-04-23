@@ -103,12 +103,6 @@ qreal Star::getSquare()
     return 0.5 * qAbs(sum);
 }
 
-FigureType Star::getFigureType() const
-{
-    return kStar;
-}
-
-
 Figure* Star::clone() const
 {
     Star* copy = new Star(getStartPoint(), currentPointsCount_);

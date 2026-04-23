@@ -18,13 +18,14 @@ SOURCES += \
     scene.cpp \
     square.cpp \
     star.cpp \
-    trapezoid.cpp \
+    parallelogram.cpp \
     triangle.cpp \
     polygon.cpp \
     line.cpp \
     polyline.cpp \
     ellipse.cpp \
-    layer.cpp
+    layer.cpp \
+    pluginmanager.cpp
 
 HEADERS += \
     circle.h \
@@ -37,13 +38,15 @@ HEADERS += \
     scene.h \
     square.h \
     star.h \
-    trapezoid.h \
+    parallelogram.h \
     triangle.h \
     polygon.h \
     line.h \
     polyline.h \
     ellipse.h \
-    layer.h
+    layer.h \
+    pluginmanager.h \
+    figureplugininterface.h
 
 FORMS += \
     mainwindow.ui
@@ -52,3 +55,4 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+QMAKE_LFLAGS += -rdynamic

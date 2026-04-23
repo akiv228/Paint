@@ -7,10 +7,11 @@
 #include "rectangle.h"
 #include "star.h"
 #include "polygon.h"
-#include "trapezoid.h"
+#include "parallelogram.h"
 #include "line.h"
 #include "polyline.h"
 #include "ellipse.h"
+#include "pluginmanager.h"
 #include <QCursor>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsScene>
@@ -130,53 +131,18 @@ void Figure::updateTransformOriginPoint()
     setTransformOriginPoint(center);
 }
 
-// JSON сериализация
-
-QString figureTypeToString(FigureType type) {
-    switch (type) {
-    case kTriangle:   return "Triangle";
-    case kCircle:     return "Circle";
-    case kRhombus:    return "Rhombus";
-    case kSquare:     return "Square";
-    case kRectangle:  return "Rectangle";
-    case kStar:       return "Star";
-    case kPolygon:    return "Polygon";
-    case kTrapezoid:  return "Trapezoid";
-    case kLine:       return "Line";
-    case kEllipse:    return "Ellipse";
-    case kPolyline:   return "Polyline";
-    default:          return "Unknown";
-    }
-}
-
-FigureType figureTypeFromString(const QString &str) {
-    if (str == "Triangle")  return kTriangle;
-    if (str == "Circle")    return kCircle;
-    if (str == "Rhombus")   return kRhombus;
-    if (str == "Square")    return kSquare;
-    if (str == "Rectangle") return kRectangle;
-    if (str == "Star")      return kStar;
-    if (str == "Polygon")   return kPolygon;
-    if (str == "Trapezoid") return kTrapezoid;
-    if (str == "Line")      return kLine;
-    if (str == "Ellipse")   return kEllipse;
-    if (str == "Polyline")  return kPolyline;
-    return kTriangle;
-}
 
 QJsonObject Figure::toJson() const
 {
     QJsonObject obj;
-    obj["type"] = figureTypeToString(getFigureType());
+    obj["typeId"] = getFigureTypeId();
     obj["startPoint"] = QJsonObject{{"x", startPoint_.x()}, {"y", startPoint_.y()}};
     obj["endPoint"]   = QJsonObject{{"x", endPoint_.x()},   {"y", endPoint_.y()}};
     obj["penColor"]   = penColor_.name(QColor::HexArgb);
-    // Сохраняем кисть только если она валидна (т.е. была установлена)
-    if (brushColor_.isValid()) {
+    if (brushColor_.isValid())
         obj["brushColor"] = brushColor_.name(QColor::HexArgb);
-    } else {
-        obj["brushColor"] = QJsonValue(); // null
-    }
+    else
+        obj["brushColor"] = QJsonValue();
     obj["penWidth"]   = penWidth_;
     obj["pos"]        = QJsonObject{{"x", pos().x()}, {"y", pos().y()}};
     obj["rotation"]   = rotation();
@@ -219,24 +185,5 @@ void Figure::fromJson(const QJsonObject &obj)
 
 Figure* Figure::createFromJson(const QJsonObject &obj)
 {
-    FigureType type = figureTypeFromString(obj["type"].toString());
-    Figure *fig = nullptr;
-
-    switch (type) {
-    case kTriangle:   fig = new Triangle(QPointF()); break;
-    case kCircle:     fig = new Circle(QPointF());   break;
-    case kRhombus:    fig = new Rhombus(QPointF());  break;
-    case kSquare:     fig = new Square(QPointF());   break;
-    case kRectangle:  fig = new Rectangle(QPointF());break;
-    case kStar:       fig = new Star(QPointF());     break;
-    case kPolygon:    fig = new Polygon(QPointF());  break;
-    case kTrapezoid:  fig = new Trapezoid(QPointF());break;
-    case kLine:       fig = new Line(QPointF());     break;
-    case kEllipse:    fig = new Ellipse(QPointF());  break;
-    case kPolyline:   fig = new Polyline(QPointF()); break;
-    default: return nullptr;
-    }
-
-    fig->fromJson(obj);
-    return fig;
+    return PluginManager::instance()->createFromJson(obj);
 }

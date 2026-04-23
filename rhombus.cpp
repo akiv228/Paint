@@ -56,12 +56,6 @@ qreal Rhombus::getSquare()
     return 0.5 * qAbs(sum);
 }
 
-FigureType Rhombus::getFigureType() const
-{
-    return kRhombus;
-}
-
-
 Figure* Rhombus::clone() const
 {
     Rhombus* copy = new Rhombus(getStartPoint());

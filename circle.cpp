@@ -48,10 +48,7 @@ qreal Circle::getSquare()
     return M_PI * radius_ * radius_;
 }
 
-FigureType Circle::getFigureType() const
-{
-    return kCircle;
-}
+
 
 
 Figure* Circle::clone() const

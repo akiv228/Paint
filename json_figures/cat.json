@@ -1,0 +1,1285 @@
+{
+    "currentLayerIndex": 0,
+    "layers": [
+        {
+            "figures": [
+                {
+                    "brushColor": "#ffffa348",
+                    "endPoint": {
+                        "x": 1149,
+                        "y": 620
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": -44,
+                        "y": 7
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 632,
+                        "y": 334
+                    },
+                    "transformOriginPoint": {
+                        "x": 890.5,
+                        "y": 477
+                    },
+                    "typeId": "Ellipse",
+                    "zValue": 1000
+                },
+                {
+                    "brushColor": "#ffffbe6f",
+                    "endPoint": {
+                        "x": 741,
+                        "y": 414
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": -36,
+                        "y": 67
+                    },
+                    "rotation": -180,
+                    "startPoint": {
+                        "x": 508,
+                        "y": 188
+                    },
+                    "transformOriginPoint": {
+                        "x": 624.5,
+                        "y": 301
+                    },
+                    "typeId": "Triangle",
+                    "zValue": 1001
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 1288,
+                        "y": 415
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 1288,
+                        "y": 415
+                    },
+                    "transformOriginPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "typeId": "Rectangle",
+                    "zValue": 1002
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 1597,
+                        "y": 425
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": -64,
+                        "y": -53
+                    },
+                    "rotation": -20,
+                    "startPoint": {
+                        "x": 1151,
+                        "y": 462
+                    },
+                    "transformOriginPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "typeId": "Rectangle",
+                    "zValue": 1003
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 1177,
+                        "y": 496
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 1177,
+                        "y": 496
+                    },
+                    "transformOriginPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "typeId": "Rectangle",
+                    "zValue": 1004
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 1576,
+                        "y": 441
+                    },
+                    "penColor": "#fff3f610",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": -12,
+                        "y": -56
+                    },
+                    "rotation": -15,
+                    "startPoint": {
+                        "x": 1106,
+                        "y": 473
+                    },
+                    "transformOriginPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "typeId": "Rectangle",
+                    "zValue": 1005
+                },
+                {
+                    "brushColor": "#ffed333b",
+                    "endPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "penColor": "#ffed333b",
+                    "penWidth": 7,
+                    "points": [
+                        {
+                            "x": 0,
+                            "y": 0
+                        },
+                        {
+                            "x": 28,
+                            "y": 14
+                        },
+                        {
+                            "x": 60,
+                            "y": -8
+                        },
+                        {
+                            "x": 60,
+                            "y": -8
+                        }
+                    ],
+                    "pos": {
+                        "x": 563,
+                        "y": 390
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "transformOriginPoint": {
+                        "x": 30,
+                        "y": 3
+                    },
+                    "typeId": "Polyline",
+                    "zValue": 1006
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 1005,
+                        "y": 202
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pointsCount": 9,
+                    "pos": {
+                        "x": 556,
+                        "y": 194
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 971,
+                        "y": 148
+                    },
+                    "transformOriginPoint": {
+                        "x": 971,
+                        "y": 148
+                    },
+                    "typeId": "Star",
+                    "zValue": 1007
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 1380,
+                        "y": 468
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pointsCount": 9,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 1380,
+                        "y": 468
+                    },
+                    "transformOriginPoint": {
+                        "x": 1380,
+                        "y": 468
+                    },
+                    "typeId": "Star",
+                    "zValue": 1008
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 1560,
+                        "y": 421
+                    },
+                    "penColor": "#fff3f610",
+                    "penWidth": 1,
+                    "pos": {
+                        "x": -33,
+                        "y": -27
+                    },
+                    "rotation": -15,
+                    "startPoint": {
+                        "x": 1128,
+                        "y": 456
+                    },
+                    "transformOriginPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "typeId": "Rectangle",
+                    "zValue": 1009
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 1058,
+                        "y": 155
+                    },
+                    "penColor": "#fff3f610",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 1058,
+                        "y": 155
+                    },
+                    "transformOriginPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "typeId": "Rectangle",
+                    "zValue": 1010
+                },
+                {
+                    "brushColor": "#ff1c71d8",
+                    "endPoint": {
+                        "x": 840.659359369495,
+                        "y": 272.391231243394
+                    },
+                    "penColor": "#ff1a5fb4",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": -190,
+                        "y": 50
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 827,
+                        "y": 256
+                    },
+                    "transformOriginPoint": {
+                        "x": 827,
+                        "y": 256
+                    },
+                    "typeId": "Circle",
+                    "zValue": 1011
+                },
+                {
+                    "brushColor": "#ff1c71d8",
+                    "endPoint": {
+                        "x": 847,
+                        "y": 273
+                    },
+                    "penColor": "#ff241f31",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 847,
+                        "y": 273
+                    },
+                    "transformOriginPoint": {
+                        "x": 847,
+                        "y": 273
+                    },
+                    "typeId": "Circle",
+                    "zValue": 1012
+                },
+                {
+                    "brushColor": "#ff1c71d8",
+                    "endPoint": {
+                        "x": 840.659359369495,
+                        "y": 272.391231243394
+                    },
+                    "penColor": "#ff1a5fb4",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": -275,
+                        "y": 49
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 827,
+                        "y": 256
+                    },
+                    "transformOriginPoint": {
+                        "x": 827,
+                        "y": 256
+                    },
+                    "typeId": "Circle",
+                    "zValue": 1013
+                },
+                {
+                    "brushColor": "#ff000000",
+                    "endPoint": {
+                        "x": 382,
+                        "y": 355
+                    },
+                    "penColor": "#ff000000",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 180,
+                        "y": -39
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 379,
+                        "y": 350
+                    },
+                    "transformOriginPoint": {
+                        "x": 379,
+                        "y": 350
+                    },
+                    "typeId": "Circle",
+                    "zValue": 1014
+                },
+                {
+                    "brushColor": "#ff000000",
+                    "endPoint": {
+                        "x": 382,
+                        "y": 355
+                    },
+                    "penColor": "#ff000000",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 266,
+                        "y": -40
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 379,
+                        "y": 350
+                    },
+                    "transformOriginPoint": {
+                        "x": 379,
+                        "y": 350
+                    },
+                    "typeId": "Circle",
+                    "zValue": 1015
+                },
+                {
+                    "brushColor": "#ffe66100",
+                    "endPoint": {
+                        "x": 400.41729418431953,
+                        "y": 378.02315183262226
+                    },
+                    "penColor": "#ff63452c",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 200,
+                        "y": -10
+                    },
+                    "rotation": -180,
+                    "startPoint": {
+                        "x": 388.58270581568047,
+                        "y": 354.97684816737774
+                    },
+                    "transformOriginPoint": {
+                        "x": 394.5,
+                        "y": 366.5
+                    },
+                    "typeId": "Triangle",
+                    "zValue": 1016
+                },
+                {
+                    "brushColor": "#ff000000",
+                    "endPoint": {
+                        "x": 901,
+                        "y": 282
+                    },
+                    "penColor": "#ff000000",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 901,
+                        "y": 282
+                    },
+                    "transformOriginPoint": {
+                        "x": 901.5,
+                        "y": 282.5
+                    },
+                    "typeId": "Triangle",
+                    "zValue": 1017
+                },
+                {
+                    "brushColor": "#ff000000",
+                    "endPoint": {
+                        "x": 1287,
+                        "y": 245
+                    },
+                    "penColor": "#ff000000",
+                    "penWidth": 5,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 1287,
+                        "y": 245
+                    },
+                    "transformOriginPoint": {
+                        "x": 1287.5,
+                        "y": 245.5
+                    },
+                    "typeId": "Triangle",
+                    "zValue": 1018
+                },
+                {
+                    "brushColor": "#ff000000",
+                    "endPoint": {
+                        "x": 913,
+                        "y": 255
+                    },
+                    "penColor": "#ff000000",
+                    "penWidth": 5,
+                    "pos": {
+                        "x": -123,
+                        "y": 53
+                    },
+                    "rotation": 5,
+                    "startPoint": {
+                        "x": 750,
+                        "y": 305
+                    },
+                    "transformOriginPoint": {
+                        "x": 831.5,
+                        "y": 280
+                    },
+                    "typeId": "Line",
+                    "zValue": 1019
+                },
+                {
+                    "brushColor": "#ff000000",
+                    "endPoint": {
+                        "x": 913,
+                        "y": 255
+                    },
+                    "penColor": "#ff000000",
+                    "penWidth": 5,
+                    "pos": {
+                        "x": -122,
+                        "y": 70
+                    },
+                    "rotation": 15,
+                    "startPoint": {
+                        "x": 750,
+                        "y": 305
+                    },
+                    "transformOriginPoint": {
+                        "x": 831.5,
+                        "y": 280
+                    },
+                    "typeId": "Line",
+                    "zValue": 1020
+                },
+                {
+                    "brushColor": "#ff000000",
+                    "endPoint": {
+                        "x": 913,
+                        "y": 255
+                    },
+                    "penColor": "#ff000000",
+                    "penWidth": 5,
+                    "pos": {
+                        "x": -122,
+                        "y": 93
+                    },
+                    "rotation": 30,
+                    "startPoint": {
+                        "x": 750,
+                        "y": 305
+                    },
+                    "transformOriginPoint": {
+                        "x": 831.5,
+                        "y": 280
+                    },
+                    "typeId": "Line",
+                    "zValue": 1021
+                },
+                {
+                    "brushColor": "#ff000000",
+                    "endPoint": {
+                        "x": 913,
+                        "y": 255
+                    },
+                    "penColor": "#ff000000",
+                    "penWidth": 5,
+                    "pos": {
+                        "x": -355,
+                        "y": 62
+                    },
+                    "rotation": 25,
+                    "startPoint": {
+                        "x": 750,
+                        "y": 305
+                    },
+                    "transformOriginPoint": {
+                        "x": 831.5,
+                        "y": 280
+                    },
+                    "typeId": "Line",
+                    "zValue": 1022
+                },
+                {
+                    "brushColor": "#ff000000",
+                    "endPoint": {
+                        "x": 913,
+                        "y": 255
+                    },
+                    "penColor": "#ff000000",
+                    "penWidth": 5,
+                    "pos": {
+                        "x": -356,
+                        "y": 78
+                    },
+                    "rotation": 15,
+                    "startPoint": {
+                        "x": 750,
+                        "y": 305
+                    },
+                    "transformOriginPoint": {
+                        "x": 831.5,
+                        "y": 280
+                    },
+                    "typeId": "Line",
+                    "zValue": 1023
+                },
+                {
+                    "brushColor": "#ff000000",
+                    "endPoint": {
+                        "x": 913,
+                        "y": 255
+                    },
+                    "penColor": "#ff000000",
+                    "penWidth": 5,
+                    "pos": {
+                        "x": -350,
+                        "y": 101
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 750,
+                        "y": 305
+                    },
+                    "transformOriginPoint": {
+                        "x": 831.5,
+                        "y": 280
+                    },
+                    "typeId": "Line",
+                    "zValue": 1024
+                },
+                {
+                    "brushColor": "#ff000000",
+                    "endPoint": {
+                        "x": 481,
+                        "y": 569
+                    },
+                    "penColor": "#ff000000",
+                    "penWidth": 5,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 481,
+                        "y": 569
+                    },
+                    "transformOriginPoint": {
+                        "x": 481,
+                        "y": 569
+                    },
+                    "typeId": "Line",
+                    "zValue": 1025
+                },
+                {
+                    "brushColor": "#ffffbe6f",
+                    "endPoint": {
+                        "x": 769,
+                        "y": 264
+                    },
+                    "penColor": "#ffe66100",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": -122,
+                        "y": -17
+                    },
+                    "rotation": 5,
+                    "startPoint": {
+                        "x": 817,
+                        "y": 137
+                    },
+                    "transformOriginPoint": {
+                        "x": 793,
+                        "y": 200.5
+                    },
+                    "typeId": "Triangle",
+                    "zValue": 1026
+                },
+                {
+                    "brushColor": "#ffffbe6f",
+                    "endPoint": {
+                        "x": 769,
+                        "y": 264
+                    },
+                    "penColor": "#ffe66100",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": -286,
+                        "y": -14
+                    },
+                    "rotation": -10,
+                    "startPoint": {
+                        "x": 817,
+                        "y": 137
+                    },
+                    "transformOriginPoint": {
+                        "x": 793,
+                        "y": 200.5
+                    },
+                    "typeId": "Triangle",
+                    "zValue": 1027
+                },
+                {
+                    "brushColor": "#ffffbe6f",
+                    "endPoint": {
+                        "x": 966,
+                        "y": 198
+                    },
+                    "penColor": "#ffe66100",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 966,
+                        "y": 198
+                    },
+                    "transformOriginPoint": {
+                        "x": 966.5,
+                        "y": 198.5
+                    },
+                    "typeId": "Triangle",
+                    "zValue": 1028
+                },
+                {
+                    "brushColor": null,
+                    "endPoint": {
+                        "x": 794,
+                        "y": 227
+                    },
+                    "penColor": "#ffffa500",
+                    "penWidth": 1,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 794,
+                        "y": 227
+                    },
+                    "transformOriginPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "typeId": "TrapezoidEx",
+                    "zValue": 1029
+                },
+                {
+                    "brushColor": null,
+                    "endPoint": {
+                        "x": 889,
+                        "y": 175
+                    },
+                    "penColor": "#ffffa500",
+                    "penWidth": 1,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 889,
+                        "y": 175
+                    },
+                    "transformOriginPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "typeId": "TrapezoidEx",
+                    "zValue": 1030
+                },
+                {
+                    "brushColor": null,
+                    "endPoint": {
+                        "x": 791,
+                        "y": 217
+                    },
+                    "penColor": "#ffffa500",
+                    "penWidth": 1,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 791,
+                        "y": 217
+                    },
+                    "transformOriginPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "typeId": "TrapezoidEx",
+                    "zValue": 1031
+                },
+                {
+                    "brushColor": null,
+                    "endPoint": {
+                        "x": 675,
+                        "y": 98
+                    },
+                    "penColor": "#ffffa500",
+                    "penWidth": 1,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 675,
+                        "y": 98
+                    },
+                    "transformOriginPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "typeId": "TrapezoidEx",
+                    "zValue": 1032
+                },
+                {
+                    "brushColor": null,
+                    "endPoint": {
+                        "x": 694,
+                        "y": 108
+                    },
+                    "penColor": "#ffffa500",
+                    "penWidth": 1,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 694,
+                        "y": 108
+                    },
+                    "transformOriginPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "typeId": "TrapezoidEx",
+                    "zValue": 1033
+                }
+            ],
+            "name": "Layer 1",
+            "visible": true
+        },
+        {
+            "figures": [
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 793,
+                        "y": 718
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 12,
+                        "y": -10
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 698,
+                        "y": 607
+                    },
+                    "transformOriginPoint": {
+                        "x": 745.5,
+                        "y": 662.5
+                    },
+                    "typeId": "Ellipse",
+                    "zValue": 0
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 789,
+                        "y": 716
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 200,
+                        "y": -4
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 698,
+                        "y": 607
+                    },
+                    "transformOriginPoint": {
+                        "x": 743.5,
+                        "y": 661.5
+                    },
+                    "typeId": "Ellipse",
+                    "zValue": 1
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 1052,
+                        "y": 652
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 1052,
+                        "y": 652
+                    },
+                    "transformOriginPoint": {
+                        "x": 1052,
+                        "y": 652
+                    },
+                    "typeId": "Ellipse",
+                    "zValue": 2
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 1069,
+                        "y": 622
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 1069,
+                        "y": 622
+                    },
+                    "transformOriginPoint": {
+                        "x": 1069,
+                        "y": 622
+                    },
+                    "typeId": "Ellipse",
+                    "zValue": 3
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 215,
+                        "y": 114
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 215,
+                        "y": 114
+                    },
+                    "transformOriginPoint": {
+                        "x": 215,
+                        "y": 114
+                    },
+                    "typeId": "Ellipse",
+                    "zValue": 4
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 1186,
+                        "y": 441
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 1186,
+                        "y": 441
+                    },
+                    "transformOriginPoint": {
+                        "x": 1186,
+                        "y": 441
+                    },
+                    "typeId": "Ellipse",
+                    "zValue": 5
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 1160,
+                        "y": 437
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 1160,
+                        "y": 437
+                    },
+                    "transformOriginPoint": {
+                        "x": 1160,
+                        "y": 437
+                    },
+                    "typeId": "Ellipse",
+                    "zValue": 6
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 1177,
+                        "y": 438
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 1177,
+                        "y": 438
+                    },
+                    "transformOriginPoint": {
+                        "x": 1177,
+                        "y": 438
+                    },
+                    "typeId": "Ellipse",
+                    "zValue": 7
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 1184,
+                        "y": 440
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 1184,
+                        "y": 440
+                    },
+                    "transformOriginPoint": {
+                        "x": 1184,
+                        "y": 440
+                    },
+                    "typeId": "Ellipse",
+                    "zValue": 8
+                },
+                {
+                    "brushColor": "#ffff7800",
+                    "endPoint": {
+                        "x": 1226,
+                        "y": 439
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 1207,
+                        "y": 435
+                    },
+                    "transformOriginPoint": {
+                        "x": 1216.5,
+                        "y": 437
+                    },
+                    "typeId": "Ellipse",
+                    "zValue": 9
+                },
+                {
+                    "brushColor": "#ffffbe6f",
+                    "endPoint": {
+                        "x": 628,
+                        "y": 343
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 628,
+                        "y": 343
+                    },
+                    "transformOriginPoint": {
+                        "x": 628.5,
+                        "y": 343.5
+                    },
+                    "typeId": "Triangle",
+                    "zValue": 10
+                },
+                {
+                    "brushColor": "#ffffbe6f",
+                    "endPoint": {
+                        "x": 515,
+                        "y": 195
+                    },
+                    "penColor": "#fff6d32d",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 515,
+                        "y": 195
+                    },
+                    "transformOriginPoint": {
+                        "x": 515.5,
+                        "y": 195.5
+                    },
+                    "typeId": "Triangle",
+                    "zValue": 11
+                },
+                {
+                    "brushColor": "#ffffa348",
+                    "endPoint": {
+                        "x": 390.8145463506171,
+                        "y": 286.52826284377113
+                    },
+                    "penColor": "#fff3f610",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 68,
+                        "y": -24
+                    },
+                    "rotation": -10,
+                    "startPoint": {
+                        "x": 477.1854536493829,
+                        "y": 84.47173715622881
+                    },
+                    "transformOriginPoint": {
+                        "x": 434,
+                        "y": 185.49999999999997
+                    },
+                    "typeId": "Triangle",
+                    "zValue": 12
+                },
+                {
+                    "brushColor": "#ffffa348",
+                    "endPoint": {
+                        "x": 391.7408136922009,
+                        "y": 284.3613484654046
+                    },
+                    "penColor": "#fff3f610",
+                    "penWidth": 3,
+                    "pos": {
+                        "x": 241,
+                        "y": -28
+                    },
+                    "rotation": 5,
+                    "startPoint": {
+                        "x": 472.2591863077991,
+                        "y": 86.63865153459527
+                    },
+                    "transformOriginPoint": {
+                        "x": 432,
+                        "y": 185.49999999999994
+                    },
+                    "typeId": "Triangle",
+                    "zValue": 13
+                },
+                {
+                    "brushColor": null,
+                    "endPoint": {
+                        "x": 932,
+                        "y": 188
+                    },
+                    "penColor": "#ffffa500",
+                    "penWidth": 1,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 932,
+                        "y": 188
+                    },
+                    "transformOriginPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "typeId": "TrapezoidEx",
+                    "zValue": 14
+                },
+                {
+                    "brushColor": null,
+                    "endPoint": {
+                        "x": 923,
+                        "y": 194
+                    },
+                    "penColor": "#ffffa500",
+                    "penWidth": 1,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 923,
+                        "y": 194
+                    },
+                    "transformOriginPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "typeId": "TrapezoidEx",
+                    "zValue": 15
+                },
+                {
+                    "brushColor": null,
+                    "endPoint": {
+                        "x": 875,
+                        "y": 211
+                    },
+                    "penColor": "#ffffa500",
+                    "penWidth": 1,
+                    "pos": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 875,
+                        "y": 211
+                    },
+                    "transformOriginPoint": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "typeId": "TrapezoidEx",
+                    "zValue": 16
+                },
+                {
+                    "brushColor": null,
+                    "endPoint": {
+                        "x": 1534.1596584504223,
+                        "y": 359.8115261570222
+                    },
+                    "penColor": "#ffffa500",
+                    "penWidth": 30,
+                    "pos": {
+                        "x": -32,
+                        "y": 0
+                    },
+                    "rotation": 0,
+                    "startPoint": {
+                        "x": 1140.8403415495777,
+                        "y": 472.1884738429778
+                    },
+                    "transformOriginPoint": {
+                        "x": 1337.5,
+                        "y": 416
+                    },
+                    "typeId": "Line",
+                    "zValue": 17
+                }
+            ],
+            "name": "Layer 2",
+            "visible": true
+        }
+    ]
+}

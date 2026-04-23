@@ -4,6 +4,7 @@
 #include <QColorDialog>
 #include <QMainWindow>
 #include <QComboBox>
+#include <QVBoxLayout>
 #include "scene.h"
 
 QT_BEGIN_NAMESPACE
@@ -22,43 +23,17 @@ public:
 
 protected:
     void wheelEvent(QWheelEvent *event) override;
-
-private:
-    Ui::MainWindow *ui_;
-    Scene *scene_;
-    QTimer *timer_;
-    QTimer *statusTimer_;
-
-    QComboBox *layerCombo_;
-    QComboBox *moveToCombo_;
-
-    void resizeEvent(QResizeEvent *event);
-    void keyPressEvent(QKeyEvent *event);
-
-    QTimer* scaleUndoTimer_;
-    bool scaleUndoPending_ = false;
+    void resizeEvent(QResizeEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
+    void on_actionLoadPlugin_triggered();
     void timerSlot();
-    void handleTriangleButton();
-    void handleCircleButton();
-    void handleRhombusButton();
-    void handleSquareButton();
-    void handleRectangleButton();
-    void handleStarButton();
-    void handlePolygonButton();
-    void handleTrapezoidButton();
+    void updateStatus();
     void handlePenColorButton();
     void handleBrushColorButton();
     void handlePenWidthButton();
     void handleEraseButton();
-    void updateStatus();
-    void handleLineButton();
-    void handlePolylineButton();
-    void handleEllipseButton();
-    void undo();
-    void redo();
-    void resetScaleUndoFlag(); 
     void handleAddLayer();
     void handleRemoveLayer();
     void handleLayerUp();
@@ -66,9 +41,21 @@ private slots:
     void updateLayerList();
     void setCurrentLayer(int index);
     void moveSelectedToLayer(int index);
+    void resetScaleUndoFlag();
     void on_actionSave_triggered();
     void on_actionOpen_triggered();
+    void updateFigureButtons();
 
+private:
+    Ui::MainWindow *ui_;
+    Scene *scene_;
+    QTimer *timer_;
+    QTimer *statusTimer_;
+    QTimer *scaleUndoTimer_;
+    bool scaleUndoPending_ = false;
+    QComboBox *layerCombo_;
+    QComboBox *moveToCombo_;
+    QVBoxLayout *figureButtonsLayout_;
 };
 
-#endif 
+#endif // MAINWINDOW_H

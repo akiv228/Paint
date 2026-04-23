@@ -1,12 +1,18 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "pluginmanager.h"
+#include "triangle.h"
+#include "circle.h"
+#include "rhombus.h"
+#include "square.h"
+#include "rectangle.h"
 #include "star.h"
 #include "polygon.h"
-#include "QDebug"
-#include "constants.h"
+#include "parallelogram.h"
 #include "line.h"
 #include "polyline.h"
 #include "ellipse.h"
+#include "constants.h"
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QTimer>
@@ -14,7 +20,10 @@
 #include <QWheelEvent>
 #include <QToolBar>
 #include <QLabel>
-
+#include <QPushButton>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QPluginLoader>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -58,22 +67,56 @@ MainWindow::MainWindow(QWidget *parent)
     fileToolBar->addAction("Save", this, &MainWindow::on_actionSave_triggered);
     fileToolBar->addAction("Open", this, &MainWindow::on_actionOpen_triggered);
 
-    connect(ui_->trianglePushButton, &QPushButton::clicked, this, &MainWindow::handleTriangleButton);
-    connect(ui_->circlePushButton, &QPushButton::clicked, this, &MainWindow::handleCircleButton);
-    connect(ui_->rhombusPushButton, &QPushButton::clicked, this, &MainWindow::handleRhombusButton);
-    connect(ui_->squarePushButton, &QPushButton::clicked, this, &MainWindow::handleSquareButton);
-    connect(ui_->rectanglePushButton, &QPushButton::clicked, this, &MainWindow::handleRectangleButton);
-    connect(ui_->starPushButton, &QPushButton::clicked, this, &MainWindow::handleStarButton);
-    connect(ui_->polygonPushButton, &QPushButton::clicked, this, &MainWindow::handlePolygonButton);
-    connect(ui_->trapezoidPushButton, &QPushButton::clicked, this, &MainWindow::handleTrapezoidButton);
+    QMenu *pluginMenu = menuBar()->addMenu("Plugins");
+    pluginMenu->addAction("Load Plugin...", this, &MainWindow::on_actionLoadPlugin_triggered);
+
+    QToolBar *pluginToolBar = addToolBar("Plugins");
+    pluginToolBar->addAction("Load Plugin", this, &MainWindow::on_actionLoadPlugin_triggered);
+
+    PluginManager::instance()->registerBuiltInFigure("Triangle", "Triangle",
+        [](const QPointF& p) -> Figure* { return new Triangle(p); },
+        [](const QJsonObject& obj) -> Figure* { Triangle* t = new Triangle(QPointF()); t->fromJson(obj); return t; });
+    PluginManager::instance()->registerBuiltInFigure("Circle", "Circle",
+        [](const QPointF& p) -> Figure* { return new Circle(p); },
+        [](const QJsonObject& obj) -> Figure* { Circle* c = new Circle(QPointF()); c->fromJson(obj); return c; });
+    PluginManager::instance()->registerBuiltInFigure("Rhombus", "Rhombus",
+        [](const QPointF& p) -> Figure* { return new Rhombus(p); },
+        [](const QJsonObject& obj) -> Figure* { Rhombus* r = new Rhombus(QPointF()); r->fromJson(obj); return r; });
+    PluginManager::instance()->registerBuiltInFigure("Square", "Square",
+        [](const QPointF& p) -> Figure* { return new Square(p); },
+        [](const QJsonObject& obj) -> Figure* { Square* s = new Square(QPointF()); s->fromJson(obj); return s; });
+    PluginManager::instance()->registerBuiltInFigure("Rectangle", "Rectangle",
+        [](const QPointF& p) -> Figure* { return new Rectangle(p); },
+        [](const QJsonObject& obj) -> Figure* { Rectangle* r = new Rectangle(QPointF()); r->fromJson(obj); return r; });
+    PluginManager::instance()->registerBuiltInFigure("Star", "Star",
+        [](const QPointF& p) -> Figure* { return new Star(p); },
+        [](const QJsonObject& obj) -> Figure* { Star* s = new Star(QPointF()); s->fromJson(obj); return s; });
+    PluginManager::instance()->registerBuiltInFigure("Polygon", "Polygon",
+        [](const QPointF& p) -> Figure* { return new Polygon(p); },
+        [](const QJsonObject& obj) -> Figure* { Polygon* pol = new Polygon(QPointF()); pol->fromJson(obj); return pol; });
+    PluginManager::instance()->registerBuiltInFigure("Parallelogram", "Parallelogram",
+        [](const QPointF& p) -> Figure* { return new Parallelogram(p); },
+        [](const QJsonObject& obj) -> Figure* { Parallelogram* par = new Parallelogram(QPointF()); par->fromJson(obj); return par; });
+    PluginManager::instance()->registerBuiltInFigure("Line", "Line",
+        [](const QPointF& p) -> Figure* { return new Line(p); },
+        [](const QJsonObject& obj) -> Figure* { Line* l = new Line(QPointF()); l->fromJson(obj); return l; });
+    PluginManager::instance()->registerBuiltInFigure("Ellipse", "Ellipse",
+        [](const QPointF& p) -> Figure* { return new Ellipse(p); },
+        [](const QJsonObject& obj) -> Figure* { Ellipse* e = new Ellipse(QPointF()); e->fromJson(obj); return e; });
+    PluginManager::instance()->registerBuiltInFigure("Polyline", "Polyline",
+        [](const QPointF& p) -> Figure* { return new Polyline(p); },
+        [](const QJsonObject& obj) -> Figure* { Polyline* pl = new Polyline(QPointF()); pl->fromJson(obj); return pl; });
+
+    PluginManager::instance()->loadPlugins();
+    connect(PluginManager::instance(), &PluginManager::pluginsChanged, this, &MainWindow::updateFigureButtons);
+
+    updateFigureButtons();
+
     connect(ui_->penColorPushButton, &QPushButton::clicked, this, &MainWindow::handlePenColorButton);
     connect(ui_->brushColorPushButton, &QPushButton::clicked, this, &MainWindow::handleBrushColorButton);
     connect(ui_->penWidthPushButton, &QPushButton::clicked, this, &MainWindow::handlePenWidthButton);
-    connect(ui_->erasePushButton, &QPushButton::clicked, this, &MainWindow::handleEraseButton);
-    connect(ui_->linePushButton, &QPushButton::clicked, this, &MainWindow::handleLineButton);
-    connect(ui_->polylinePushButton, &QPushButton::clicked, this, &MainWindow::handlePolylineButton);
-    connect(ui_->ellipsePushButton, &QPushButton::clicked, this, &MainWindow::handleEllipseButton);
-    
+    // connect(ui_->erasePushButton, &QPushButton::clicked, this, &MainWindow::handleEraseButton);
+
     scaleUndoTimer_ = new QTimer(this);
     scaleUndoTimer_->setSingleShot(true);
     connect(scaleUndoTimer_, &QTimer::timeout, this, &MainWindow::resetScaleUndoFlag);
@@ -108,13 +151,11 @@ void MainWindow::wheelEvent(QWheelEvent *event)
     {
         qreal factor = 1.0 + event->angleDelta().y() / 1200.0;
         if (factor > 0.1 && factor < 10.0) {
-            
             if (!scaleUndoPending_) {
                 scene_->pushUndoState();
                 scaleUndoPending_ = true;
             }
             scene_->scaleSelectedFigures(factor);
-            
             scaleUndoTimer_->start(200);
         }
     }
@@ -131,76 +172,6 @@ void MainWindow::timerSlot()
 {
     timer_->stop();
     scene_->setSceneRect(0, 0, ui_->graphicsView->width(), ui_->graphicsView->height());
-}
-
-void MainWindow::handleTriangleButton()
-{
-    scene_->setFigureType(FigureType::kTriangle);
-    scene_->un_select();
-}
-
-void MainWindow::handleCircleButton()
-{
-    scene_->setFigureType(FigureType::kCircle);
-    scene_->un_select();
-}
-
-void MainWindow::handleRhombusButton()
-{
-    scene_->setFigureType(FigureType::kRhombus);
-    scene_->un_select();
-}
-
-void MainWindow::handleSquareButton()
-{
-    scene_->setFigureType(FigureType::kSquare);
-    scene_->un_select();
-}
-
-void MainWindow::handleRectangleButton()
-{
-    scene_->setFigureType(FigureType::kRectangle);
-    scene_->un_select();
-}
-
-void MainWindow::handleEllipseButton()
-{
-    scene_->setFigureType(FigureType::kEllipse);
-    scene_->un_select();
-}
-
-void MainWindow::handleStarButton()
-{
-    bool ok;
-    int points_count = QInputDialog::getInt(this, "", "Points count", Star::getPointsCount(),
-                                            constants::kMinPointsCount, constants::kMaxStarPointsCount,
-                                            constants::kPointsCountStep, &ok);
-    if (ok)
-    {
-        Star::setPointsCount(points_count);
-        scene_->setFigureType(FigureType::kStar);
-    }
-    scene_->un_select();
-}
-
-void MainWindow::handlePolygonButton()
-{
-    bool ok;
-    int points_count = QInputDialog::getInt(this, "", "Points count", Polygon::getPointsCount(),
-                                            constants::kMinPointsCount, constants::kMaxPolygonPointsCount,
-                                            constants::kPointsCountStep, &ok);
-    if (ok)
-    {
-        Polygon::setPointsCount(points_count);
-        scene_->setFigureType(FigureType::kPolygon);
-    }
-    scene_->un_select();
-}
-
-void MainWindow::handleTrapezoidButton()
-{
-    scene_->setFigureType(FigureType::kTrapezoid);
-    scene_->un_select();
 }
 
 void MainWindow::handlePenColorButton()
@@ -242,7 +213,6 @@ void MainWindow::handleEraseButton()
 
 void MainWindow::keyPressEvent(QKeyEvent* event)
 {
-    qDebug() << "Key pressed:" << event->key();
     if (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_Z) {
         scene_->undo();
         event->accept();
@@ -260,38 +230,45 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
     }
     if (event->key() == Qt::Key_Delete) {
         scene_->deleteSelectedFigure();
+        event->accept();
+        return;
     }
     if (event->key() == Qt::Key_Escape) {
         scene_->un_select();
         scene_->cancelPolylineBuilding();
         scene_->update();
+        event->accept();
+        return;
     }
-    if (event->key() == Qt::Key_C) {
+    if (event->key() == Qt::Key_C && event->modifiers() == Qt::NoModifier) {
         scene_->removeAllItems();
+        event->accept();
+        return;
     }
 
-    
     if (!scene_->selectedFigures().isEmpty()) {
         QPointF delta(0, 0);
-        if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {
+        if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A)
             delta = QPointF(-1, 0);
-        } else if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {
+        else if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D)
             delta = QPointF(1, 0);
-        } else if (event->key() == Qt::Key_Up || event->key() == Qt::Key_W) {
+        else if (event->key() == Qt::Key_Up || event->key() == Qt::Key_W)
             delta = QPointF(0, -1);
-        } else if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {
+        else if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S)
             delta = QPointF(0, 1);
-        }
+
         if (event->key() == Qt::Key_Q) {
             scene_->pushUndoState();
             scene_->rotateSelected(-5.0);
             event->accept();
             return;
         } else if (event->key() == Qt::Key_E) {
+            scene_->pushUndoState();
             scene_->rotateSelected(5.0);
             event->accept();
             return;
         }
+
         if (!delta.isNull()) {
             scene_->pushUndoState();
             for (Figure *fig : scene_->selectedFigures()) {
@@ -307,45 +284,23 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
     QMainWindow::keyPressEvent(event);
 }
 
-void MainWindow::handleLineButton()
-{
-    scene_->setFigureType(FigureType::kLine);
-    scene_->un_select();
-}
-
-void MainWindow::handlePolylineButton()
-{
-    scene_->setFigureType(FigureType::kPolyline);
-    scene_->un_select();
-}
-
-void MainWindow::undo()
-{
-    scene_->undo();
-}
-
-void MainWindow::redo()
-{
-    scene_->redo();
-}
-
 void MainWindow::updateStatus()
 {
     statusTimer_->start(constants::kTimerIntervalMs);
     bool perimeter_ok;
     qreal perimeter = scene_->getSelectedFigurePerimeter(perimeter_ok);
-    if (perimeter_ok) {
+    if (perimeter_ok)
         ui_->perimterLabel->setText(QString::number(perimeter));
-    } else {
+    else
         ui_->perimterLabel->setText("Perimeter");
-    }
+
     bool square_ok;
     qreal square = scene_->getSelectedFigureSquare(square_ok);
-    if (square_ok) {
+    if (square_ok)
         ui_->squareLabel->setText(QString::number(square));
-    } else {
+    else
         ui_->squareLabel->setText("Square");
-    }
+
     if ((scene_->getSelectedFigure() != nullptr) && scene_->getSelectedFigure()->is_selected()) {
         QPointF center = scene_->getSelectedFigure()->getCenterOfMass();
         center = scene_->getSelectedFigure()->mapToScene(center);
@@ -356,7 +311,6 @@ void MainWindow::updateStatus()
         ui_->centerYLabel->setText("Y");
     }
 }
-
 
 void MainWindow::handleAddLayer()
 {
@@ -394,9 +348,8 @@ void MainWindow::updateLayerList()
         moveToCombo_->addItem(name);
     }
     int current = scene_->layers().indexOf(scene_->currentLayer());
-    if (current >= 0) {
+    if (current >= 0)
         layerCombo_->setCurrentIndex(current);
-    }
 }
 
 void MainWindow::setCurrentLayer(int index)
@@ -412,12 +365,10 @@ void MainWindow::moveSelectedToLayer(int index)
     scene_->update();
 }
 
-
 void MainWindow::resetScaleUndoFlag()
 {
     scaleUndoPending_ = false;
 }
-
 
 void MainWindow::on_actionSave_triggered()
 {
@@ -431,4 +382,120 @@ void MainWindow::on_actionOpen_triggered()
     QString fileName = QFileDialog::getOpenFileName(this, "Open Drawing", "", "JSON (*.json)");
     if (!fileName.isEmpty())
         scene_->loadFromFile(fileName);
+}
+
+void MainWindow::updateFigureButtons()
+{
+    // Удаляем все старые кнопки фигур (оставляем служебные кнопки: penColor, penWidth, brushColor, erase)
+    QList<QPushButton*> toRemove;
+    for (int i = 0; i < ui_->gridLayoutMenu->count(); ++i) {
+        QLayoutItem *item = ui_->gridLayoutMenu->itemAt(i);
+        if (item && item->widget()) {
+            QPushButton *btn = qobject_cast<QPushButton*>(item->widget());
+            if (btn && btn != ui_->penColorPushButton && btn != ui_->penWidthPushButton &&
+                btn != ui_->brushColorPushButton) {
+                toRemove.append(btn);
+            }
+        }
+    }
+    for (QPushButton *btn : toRemove) {
+        ui_->gridLayoutMenu->removeWidget(btn);
+        delete btn;
+    }
+
+    QStringList types = PluginManager::instance()->availableFigureTypes();
+    int row = 1;
+    int col = 0;
+    const int maxCols = 12;
+
+    for (const QString& typeId : types) {
+        QString symbol = PluginManager::instance()->iconSymbol(typeId);
+        if (symbol.isEmpty())
+            symbol = "?";
+        QString displayName = PluginManager::instance()->displayName(typeId);
+
+        QPushButton *btn = new QPushButton(symbol);
+        btn->setMaximumSize(20, 20);
+        btn->setToolTip(displayName);
+
+        connect(btn, &QPushButton::clicked, this, [this, typeId]() {
+            if (typeId == "Star") {
+                bool ok;
+                int points_count = QInputDialog::getInt(this, "", "Points count", Star::getPointsCount(),
+                                                        constants::kMinPointsCount, constants::kMaxStarPointsCount,
+                                                        constants::kPointsCountStep, &ok);
+                if (ok) {
+                    Star::setPointsCount(points_count);
+                    scene_->setFigureType(typeId);
+                }
+            } else if (typeId == "Polygon") {
+                bool ok;
+                int points_count = QInputDialog::getInt(this, "", "Points count", Polygon::getPointsCount(),
+                                                        constants::kMinPointsCount, constants::kMaxPolygonPointsCount,
+                                                        constants::kPointsCountStep, &ok);
+                if (ok) {
+                    Polygon::setPointsCount(points_count);
+                    scene_->setFigureType(typeId);
+                }
+            } else {
+                scene_->setFigureType(typeId);
+            }
+            scene_->un_select();
+        });
+
+        ui_->gridLayoutMenu->addWidget(btn, row, col);
+        col++;
+        if (col >= maxCols) {
+            col = 0;
+            row++;
+        }
+    }
+
+    // Добавляем растягивающий элемент
+    QSpacerItem *spacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+    ui_->gridLayoutMenu->addItem(spacer, row, col, 1, maxCols - col);
+}
+
+void MainWindow::on_actionLoadPlugin_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+        "Load Figure Plugin",
+        QCoreApplication::applicationDirPath(),
+        "Plugins (*.so *.dll *.dylib);;All Files (*)");
+
+    if (fileName.isEmpty())
+        return;
+
+    QPluginLoader *loader = new QPluginLoader(fileName);
+    QObject *plugin = loader->instance();
+    if (!plugin) {
+        QMessageBox::critical(this, "Plugin Load Error",
+            "Failed to load plugin:\n" + loader->errorString());
+        delete loader;
+        return;
+    }
+
+    FigurePluginInterface *iface = qobject_cast<FigurePluginInterface*>(plugin);
+    if (!iface) {
+        QMessageBox::critical(this, "Invalid Plugin",
+            "The selected file is not a valid Paint figure plugin.");
+        loader->unload();
+        delete loader;
+        return;
+    }
+
+    QString typeId = iface->figureTypeId();
+    QString displayName = iface->displayName();
+
+    if (PluginManager::instance()->availableFigureTypes().contains(typeId)) {
+        QMessageBox::information(this, "Plugin Already Loaded",
+            QString("Plugin '%1' is already loaded.").arg(displayName));
+        loader->unload();
+        delete loader;
+        return;
+    }
+
+    PluginManager::instance()->registerExternalPlugin(typeId, displayName, plugin, iface, loader);
+    QMessageBox::information(this, "Plugin Loaded",
+        QString("Plugin '%1' loaded successfully.").arg(displayName));
 }

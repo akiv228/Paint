@@ -12,7 +12,7 @@ public:
 
     qreal getPerimeter();
     qreal getSquare();
-    FigureType getFigureType() const override;
+    QString getFigureTypeId() const override { return "Rhombus"; }
     Figure* clone() const override;
 
 private:

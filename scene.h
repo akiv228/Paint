@@ -4,31 +4,27 @@
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include "figure.h"
-#include "figureType.h"
 #include "line.h"
 #include "polyline.h"
 #include "ellipse.h"
 #include "layer.h"
 
-
 struct UndoStateItem {
-    Figure* figure;   
-    int layerIndex;   
-
+    Figure* figure;
+    int layerIndex;
     UndoStateItem(Figure* fig = nullptr, int idx = -1) : figure(fig), layerIndex(idx) {}
 };
 
 class Scene : public QGraphicsScene
 {
     Q_OBJECT
-    Q_PROPERTY(FigureType figureType READ getFigureType WRITE setFigureType NOTIFY figureTypeChanged FINAL)
 
 public:
     explicit Scene(QObject *parent = nullptr);
     void saveToFile(const QString &fileName);
     void loadFromFile(const QString &fileName);
-    FigureType getFigureType() const;
-    void setFigureType(const FigureType type);
+    void setFigureType(const QString& typeId);
+    QString getFigureType() const { return currentFigureTypeId_; }
     void setPenColor(QColor color);
     void setBrushColor(QColor color);
     void setPenWidth(qreal width);
@@ -48,7 +44,6 @@ public:
     void redo();
     void rotateSelected(qreal deltaAngle);
 
-    
     void addLayer(const QString &name);
     void removeLayer(int index);
     void moveLayerUp(int index);
@@ -62,16 +57,14 @@ public:
     QList<Figure*> selectedFigures() const { return selectedFigures_; }
     void moveSelectedFiguresToLayer(int layerIndex);
     void scaleSelectedFigures(qreal factor);
-    
 
 signals:
-    void figureTypeChanged();
     void layersChanged();
 
 private:
+    QString currentFigureTypeId_;
     Figure *currentFigure_ = nullptr;
     QList<Figure*> selectedFigures_;
-    FigureType figureType_;
     QColor currentPenColor_;
     QColor currentBrushColor_;
     qreal currentPenWidth_ = 1;
@@ -92,14 +85,12 @@ private:
     bool isBuildingPolyline_ = false;
     Polyline *buildingPolyline_ = nullptr;
 
-    
     QList<QList<UndoStateItem>> undoStack_;
     QList<QList<UndoStateItem>> redoStack_;
 
     QList<Layer*> layers_;
     int currentLayerIndex_ = -1;
 
-    
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
@@ -108,8 +99,7 @@ private:
     Figure *figureAt(QPointF point);
     bool onRectBoard(QRectF rect, QPointF point, int &side);
 
-    void restoreState(const QList<UndoStateItem>& state);  
-
+    void restoreState(const QList<UndoStateItem>& state);
     void clearSelection();
     void addToSelection(Figure *fig);
     void removeFromSelection(Figure *fig);
@@ -118,4 +108,4 @@ private:
     void updateZOrder();
 };
 
-#endif 
+#endif

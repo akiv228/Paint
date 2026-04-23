@@ -11,7 +11,7 @@ public:
 
     qreal getPerimeter() override;
     qreal getSquare() override;
-    FigureType getFigureType() const override;
+    QString getFigureTypeId() const override { return "Line"; }
     QPainterPath shape() const override;
     Figure* clone() const override;
     QRectF boundingRect() const override;

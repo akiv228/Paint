@@ -42,10 +42,7 @@ qreal Line::getSquare()
     return 0.0;
 }
 
-FigureType Line::getFigureType() const
-{
-    return kLine;
-}
+
 
 Figure* Line::clone() const
 {

@@ -24,7 +24,7 @@ public:
     void fromJson(const QJsonObject &json) override;
     qreal getPerimeter() override;
     qreal getSquare() override;
-    FigureType getFigureType() const override;
+    QString getFigureTypeId() const override { return "Polyline"; }
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
     Figure* clone() const override;

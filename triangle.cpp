@@ -90,11 +90,6 @@ qreal Triangle::getSquare()
     return 0.5 * qAbs(sum);
 }
 
-FigureType Triangle::getFigureType() const
-{
-    return kTriangle;
-}
-
 QPointF Triangle::getCenterOfMass() const
 {
     QPolygonF poly = getPolygon();

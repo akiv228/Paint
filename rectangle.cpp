@@ -55,12 +55,6 @@ qreal Rectangle::getSquare()
     return 0.5 * qAbs(sum);
 }
 
-FigureType Rectangle::getFigureType() const
-{
-    return kRectangle;
-}
-
-
 Figure* Rectangle::clone() const
 {
     Rectangle* copy = new Rectangle(getStartPoint());

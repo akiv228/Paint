@@ -34,7 +34,7 @@ public:
     QRectF boundingRect() const override;
     virtual qreal getPerimeter() = 0;
     virtual qreal getSquare() = 0;
-    virtual FigureType getFigureType() const = 0;
+    virtual QString getFigureTypeId() const = 0;
     virtual QPointF getCenterOfMass() const;
     virtual Figure* clone() const = 0;
     QColor getPenColor() const { return penColor_; }
@@ -68,7 +68,5 @@ signals:
     void pointChanged();
 };
 
-QString figureTypeToString(FigureType type);
-FigureType figureTypeFromString(const QString &str);
 
 #endif 

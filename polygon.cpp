@@ -99,11 +99,6 @@ qreal Polygon::getSquare()
     return 0.5 * qAbs(sum);
 }
 
-FigureType Polygon::getFigureType() const
-{
-    return FigureType::kPolygon;
-}
-
 
 Figure* Polygon::clone() const
 {

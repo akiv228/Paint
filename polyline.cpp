@@ -111,10 +111,6 @@ qreal Polyline::getSquare()
     return 0.0;
 }
 
-FigureType Polyline::getFigureType() const
-{
-    return kPolyline;
-}
 
 void Polyline::setPoints(const QPolygonF &points)
 {

@@ -44,10 +44,6 @@ qreal Ellipse::getSquare()
     return M_PI * a * b;
 }
 
-FigureType Ellipse::getFigureType() const
-{
-    return kEllipse;
-}
 
 Figure* Ellipse::clone() const
 {

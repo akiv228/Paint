@@ -1,12 +1,12 @@
 #include "scene.h"
-
+#include "pluginmanager.h"
 #include "circle.h"
 #include "polygon.h"
 #include "rectangle.h"
 #include "rhombus.h"
 #include "square.h"
 #include "star.h"
-#include "trapezoid.h"
+#include "parallelogram.h"
 #include "triangle.h"
 #include "line.h"
 #include "polyline.h"
@@ -29,14 +29,9 @@ Scene::Scene(QObject *parent)
     rotationCenter_ = QPointF();
 }
 
-FigureType Scene::getFigureType() const
+void Scene::setFigureType(const QString& typeId)
 {
-    return figureType_;
-}
-
-void Scene::setFigureType(const FigureType type)
-{
-    figureType_ = type;
+    currentFigureTypeId_ = typeId;
 }
 
 void Scene::setPenColor(QColor color)
@@ -195,6 +190,7 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
              << "currentLayer:" << currentLayer();
 
     if (clicked == nullptr) {
+        clearSelection();
         QList<QGraphicsItem*> all = items();
         qDebug() << "No figure under cursor. Total items:" << all.size();
         for (QGraphicsItem* item : all) {
@@ -298,58 +294,59 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         return; 
     }
 
-    switch (figureType_)
+    if (!currentFigureTypeId_.isEmpty())
     {
-    case kTriangle:
-        currentFigure_ = new Triangle(event->scenePos());
-        break;
-    case kCircle:
-        currentFigure_ = new Circle(event->scenePos());
-        break;
-    case kRhombus:
-        currentFigure_ = new Rhombus(event->scenePos());
-        break;
-    case kSquare:
-        currentFigure_ = new Square(event->scenePos());
-        break;
-    case kRectangle:
-        currentFigure_ = new Rectangle(event->scenePos());
-        break;
-    case kStar:
-        currentFigure_ = new Star(event->scenePos());
-        break;
-    case kPolygon:
-        currentFigure_ = new Polygon(event->scenePos());
-        break;
-    case kTrapezoid:
-        currentFigure_ = new Trapezoid(event->scenePos());
-        break;
-    case kLine:
-        currentFigure_ = new Line(event->scenePos());
-        break;
-    case kEllipse:
-        currentFigure_ = new Ellipse(event->scenePos());
-        break;
-    case kPolyline:
-    {
-        Polyline *polyline = new Polyline(event->scenePos());
-        currentFigure_ = polyline;
-        buildingPolyline_ = polyline;
-        isBuildingPolyline_ = true;
-        buildingPolyline_->setBuilding(true);
-        polyline->setPenColor(currentPenColor_);
-        polyline->setBrushColor(currentBrushColor_);
-        polyline->setPenWidth(currentPenWidth_);
-        this->addItem(currentFigure_);
-        currentFigure_->updateTransformOriginPoint();
-        if (currentLayer())
-            currentLayer()->addFigure(currentFigure_);
-        currentAdded_ = true;
+        if (currentFigureTypeId_ == "Polyline")
+        {
+            if (!isBuildingPolyline_)
+            {
+                Polyline* polyline = new Polyline(event->scenePos());
+                polyline->setPenColor(currentPenColor_);
+                polyline->setBrushColor(currentBrushColor_);
+                polyline->setPenWidth(currentPenWidth_);
+                polyline->setBuilding(true);    
+    
+                Layer* targetLayer = currentLayer();
+                if (!targetLayer && !layers_.isEmpty()) {
+                    targetLayer = layers_.first();
+                    setCurrentLayer(0);
+                }
+                if (targetLayer) {
+                    targetLayer->addFigure(polyline);
+                }
+    
+                this->addItem(polyline);
+                buildingPolyline_ = polyline;
+                isBuildingPolyline_ = true;
+                currentFigure_ = polyline;
+            }
+            return;  
+        }
+    
+        Figure* fig = PluginManager::instance()->createFigure(currentFigureTypeId_, event->scenePos());
+        if (fig) {
+            currentFigure_ = fig;
+            currentFigure_->setPos(event->pos());
+            currentFigure_->setPenColor(currentPenColor_);
+            currentFigure_->setBrushColor(currentBrushColor_);
+            currentFigure_->setPenWidth(currentPenWidth_);
+    
+            Layer* targetLayer = currentLayer();
+            if (!targetLayer && !layers_.isEmpty()) {
+                targetLayer = layers_.first();
+                setCurrentLayer(0);
+            }
+            if (targetLayer) {
+                targetLayer->addFigure(currentFigure_);
+            }
+    
+            currentAdded_ = false;
+            this->addItem(currentFigure_);
+            currentFigure_->updateTransformOriginPoint();
+        }
+    
+        this->update(QRectF(0, 0, this->width(), this->height()));
         return;
-    }
-    default:
-        currentFigure_ = new Triangle(event->scenePos());
-        break;
     }
 
     currentFigure_->setPos(event->pos());
@@ -427,7 +424,7 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         else if (mode_ == kChanging && selectedFigures_.size() == 1)
         {
             Figure *selected = selectedFigures_.first();
-            if (selected->getFigureType() == kLine)
+            if (selected->getFigureTypeId() == "Line")
             {
                 Line *line = dynamic_cast<Line*>(selected);
                 if (line)
@@ -443,10 +440,10 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             {
                 qreal dx = event->scenePos().x() - pressPos_.x();
                 qreal dy = event->scenePos().y() - pressPos_.y();
-                FigureType selected_figure_type = selected->getFigureType();
+                QString selected_figure_type = selected->getFigureTypeId(); 
 
-                if (selected_figure_type == kCircle || selected_figure_type == kStar
-                    || selected_figure_type == kPolygon || selected_figure_type == kEllipse)
+                if (selected_figure_type == "Circle" || selected_figure_type == "Star"
+                    || selected_figure_type == "Polygon" || selected_figure_type == "Ellipse")
                 {
                     qreal radius = std::sqrt(std::pow(selectedEndPoint_.x() - selectedStartPoint_.x(), 2) + std::pow(selectedEndPoint_.y() - selectedStartPoint_.y(), 2));
                     switch (currentSide_)
@@ -471,7 +468,7 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                         break;
                     }
                 }
-                else if (selected_figure_type == kPolyline)
+                else if (selected_figure_type == "Polyline")
                 {
                     Polyline *polyline = dynamic_cast<Polyline*>(selected);
                     if (polyline)
@@ -557,6 +554,7 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void Scene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
+    Q_UNUSED(event);
     qDebug() << "mouseReleaseEvent: currentFigure_ =" << (void*)currentFigure_
              << "currentAdded_ =" << currentAdded_
              << "isBuildingPolyline_ =" << isBuildingPolyline_;
@@ -570,9 +568,6 @@ void Scene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     }
     
     rotationCenter_ = QPointF();
-    
-    
-    
 }
 
 void Scene::cancelPolylineBuilding()
@@ -637,11 +632,8 @@ qreal Scene::getSelectedFigureSquare(bool &ok)
 
 void Scene::removeAllItems()
 {
-    
     clearSelection();
-
     pushUndoState();
-
     QList<QGraphicsItem*> allItems = items();
     for (QGraphicsItem* item : allItems) {
         Figure* fig = dynamic_cast<Figure*>(item);
@@ -717,8 +709,8 @@ void Scene::scaleSelectedFigure(qreal factor)
     Figure *selected = selectedFigures_.first();
     if (!selected->is_selected()) return;
 
-    FigureType type = selected->getFigureType();
-    if (type == kLine)
+    QString type = selected->getFigureTypeId();
+    if (type == "Line")
     {
         QPointF center = selected->boundingRect().center();
         QPointF start = selected->getStartPoint();
@@ -728,7 +720,7 @@ void Scene::scaleSelectedFigure(qreal factor)
         selected->setStartPoint(newStart);
         selected->setEndPoint(newEnd);
     }
-    else if (type == kPolyline)
+    else if (type == "Polyline")
     {
         Polyline* polyline = dynamic_cast<Polyline*>(selected);
         if (polyline)
@@ -1105,9 +1097,9 @@ void Scene::scaleSelectedFigures(qreal factor)
 {
     if (selectedFigures_.isEmpty()) return;
     for (Figure *fig : selectedFigures_) {
-        FigureType type = fig->getFigureType();
+        QString type = fig->getFigureTypeId();
         
-        if (type == kLine) {
+        if (type == "Line") {
             Line *line = dynamic_cast<Line*>(fig);
             if (line) {
                 QPointF center = line->boundingRect().center();
@@ -1119,7 +1111,7 @@ void Scene::scaleSelectedFigures(qreal factor)
                 line->setEndPoint(newEnd);
             }
         }
-        else if (type == kPolyline) {
+        else if (type == "Polyline") {
             Polyline *polyline = dynamic_cast<Polyline*>(fig);
             if (polyline) {
                 QPointF center = polyline->boundingRect().center();
@@ -1191,15 +1183,12 @@ void Scene::loadFromFile(const QString &fileName)
     QJsonObject root = doc.object();
     QJsonArray layersArray = root["layers"].toArray();
 
-    // Словарь для быстрого поиска существующего слоя по имени
     QMap<QString, Layer*> existingLayers;
     for (Layer *layer : layers_) {
         existingLayers[layer->name()] = layer;
     }
 
-    // Запоминаем исходное количество слоёв, чтобы понять, сколько новых будет добавлено
-    int oldLayerCount = layers_.size();
-    QList<Layer*> newLayersCreated; // для отслеживания добавленных слоёв
+    QList<Layer*> newLayersCreated;
 
     for (const QJsonValue &layerVal : layersArray) {
         QJsonObject layerObj = layerVal.toObject();
@@ -1208,16 +1197,14 @@ void Scene::loadFromFile(const QString &fileName)
 
         Layer *targetLayer = nullptr;
         if (existingLayers.contains(layerName)) {
-            // Используем существующий слой
             targetLayer = existingLayers[layerName];
-            targetLayer->setVisible(visible); // обновляем видимость, если нужно
+            targetLayer->setVisible(visible);
         } else {
-            // Создаём новый слой
             targetLayer = new Layer(layerName, this);
             targetLayer->setVisible(visible);
             layers_.append(targetLayer);
             newLayersCreated.append(targetLayer);
-            existingLayers[layerName] = targetLayer; // добавляем в карту для возможных будущих слоёв с тем же именем
+            existingLayers[layerName] = targetLayer;
         }
 
         QJsonArray figuresArray = layerObj["figures"].toArray();
@@ -1233,14 +1220,11 @@ void Scene::loadFromFile(const QString &fileName)
         }
     }
 
-    // Восстанавливаем индекс текущего слоя с учётом того, что слои могли быть уже существующими
     if (root.contains("currentLayerIndex")) {
         int savedIndex = root["currentLayerIndex"].toInt();
         if (savedIndex >= 0 && savedIndex < layersArray.size()) {
-            // Ищем имя слоя по сохранённому индексу
             QJsonObject savedLayerObj = layersArray[savedIndex].toObject();
             QString savedLayerName = savedLayerObj["name"].toString();
-            // Находим индекс этого слоя в общем списке layers_
             int actualIndex = layers_.indexOf(existingLayers[savedLayerName]);
             if (actualIndex >= 0)
                 setCurrentLayer(actualIndex);
